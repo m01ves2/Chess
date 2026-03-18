@@ -103,7 +103,7 @@ namespace Chess.Application
         private GameSnapshot CreateSnapshot()
         {
             var boardCopy = _gameScene.Board.Clone();        // глубокая копия
-            var stateCopy = _gameEngine.State.Clone();        // тоже копия
+            var stateCopy = _gameEngine.GetStateSnapshot();        // тоже копия
             var playerCopy = _gameScene.CurrentPlayer;
 
             return new GameSnapshot(boardCopy, stateCopy, playerCopy);
@@ -126,7 +126,7 @@ namespace Chess.Application
 
                 _gameScene.Board = snapshot.Board;
                 _gameEngine.UpdateBoard(_gameScene.Board);
-                _gameEngine.State = snapshot.State;
+                _gameEngine.RestoreState(snapshot.State);
                 _gameScene.CurrentPlayer = snapshot.CurrentPlayer;
             }
         }

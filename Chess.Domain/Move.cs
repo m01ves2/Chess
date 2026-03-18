@@ -1,11 +1,13 @@
 ﻿namespace Chess.Domain
 {
+
     public class Move
     {
         public Position From { get; }
         public Position To { get; }
         public Piece Piece { get; }
         public Piece? CapturedPiece { get; }
+        //public Piece? PromotionTo { get; } // вот это ключ
 
         public Move(Position from, Position to, Piece piece, Piece? capturedPiece = null)
         {

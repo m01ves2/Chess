@@ -1,17 +1,13 @@
 ﻿using Chess.Domain;
 using Chess.Domain.Pieces;
 using Chess.Engine.Results;
-using System.ComponentModel;
-using System.Drawing;
-using System.Net.NetworkInformation;
-using System.Runtime.CompilerServices;
 
 namespace Chess.Engine
 {
     public class GameEngine
     {
         private Board _board;
-        public GameState State = new GameState();
+        private GameState _state = new GameState();
 
         public GameEngine(Board board)
         {
@@ -26,20 +22,21 @@ namespace Chess.Engine
 
         //public GameState GetState() => _state;
 
-        // Возвращает допустимые ходы фигуры с позиции currentPos
         private IEnumerable<Position> GeneratePseudoMoves(Position pos)
         {
             var piece = _board.GetSquare(pos).Piece;
 
             if (piece == null)
-                return Enumerable.Empty<Position>();
+                yield break;
 
-
-            return piece switch
-            {
-                Pawn => GeneratePawnMoves(pos, piece),
-                _ => GenerateNotPawnMoves(pos, piece)
-            };
+            if (piece is Pawn) {
+                foreach (var move in GeneratePawnMoves(pos, piece))
+                    yield return move;
+            }
+            else {
+                foreach (var move in GenerateNotPawnMoves(pos, piece))
+                    yield return move;
+            }
 
         }
      
@@ -51,7 +48,7 @@ namespace Chess.Engine
                         foreach (var move in TryAddNormalPawnMove(pos, pawn, offset)) yield return move;
                         break;
                     case MoveType.PawnFirstMove:
-                        foreach (var move in TryAddPawnFirstMove(pos, pawn, offset)) yield return move;
+                        foreach (var move in TryAddPawnDoubleMove(pos, pawn, offset)) yield return move;
                         break;
                     case MoveType.PawnAttack:
                         foreach (var move in TryAddPawnAttackMove(pos, pawn, offset)) yield return move;
@@ -74,7 +71,7 @@ namespace Chess.Engine
             }
         }
 
-        private IEnumerable<Position> TryAddPawnFirstMove(Position pos, Piece pawn, MoveOffset offset)
+        private IEnumerable<Position> TryAddPawnDoubleMove(Position pos, Piece pawn, MoveOffset offset)
         {
             if (!IsPawnOnStartPosition(pos, pawn))
                 yield break;
@@ -122,40 +119,51 @@ namespace Chess.Engine
         // маленькие методы для каждого типа хода
         private IEnumerable<Position> GenerateNotPawnMoves(Position pos, Piece piece)
         {
-            var possibleMoves = new List<Position>();
             foreach (var offset in piece.GetMoveOffsets()) {
-                for (int step = 1; step <= offset.MaxDistance; step++) {
-                    var target = pos + offset * step;
-                    if (!_board.IsInsideBoard(target)) 
-                        break;
-
-                    if (offset.MoveType == MoveType.Normal) {
-                        var targetSquare = _board.GetSquare(target);
-                        if (targetSquare.IsEmpty()) {
-                            possibleMoves.Add(target);
-                        }
-                        else {
-                            if (targetSquare.Piece!.Color != piece.Color) {
-                                possibleMoves.Add(target);
-                            }
-                            break;
-                        }
+                if (offset.MoveType == MoveType.Normal) {
+                    for (int step = 1; step <= offset.MaxDistance; step++) {
+                        foreach (var move in GenerateStepMove(pos, piece, offset, step))
+                            yield return move;
                     }
-                    else {
-                        switch (offset.MoveType) {
-                            case MoveType.KingCastling:
-                                foreach (var move in TryAddKingCastlingMove(pos, piece, offset)) possibleMoves.Add(move);
-                                break;
-                            case MoveType.KingLongCastling:
-                                foreach (var move in TryAddKingLongCastlingMove(pos, piece, offset)) possibleMoves.Add(move);
-                                break;
-
-                            //возможно, еще какие то специальные ходы
-                        }
-                    }                
+                }
+                else {
+                    foreach (var move in GenerateSpecialMove(pos, piece, offset))
+                        yield return move;
                 }
             }
-            return possibleMoves;
+        }
+
+        private IEnumerable<Position> GenerateStepMove(Position pos, Piece piece, MoveOffset offset, int step)
+        {
+            var target = pos + offset * step;
+            if (!_board.IsInsideBoard(target)) yield break;
+
+            var square = _board.GetSquare(target);
+            if (square.IsEmpty()) {
+                yield return target;
+            }
+            else if (square.Piece.Color != piece.Color) {
+                yield return target;
+                yield break; // дальше по этому направлению фигура идти не может
+            }
+            else {
+                yield break; // своя фигура — путь закрыт
+            }
+        }
+
+        private IEnumerable<Position> GenerateSpecialMove(Position pos, Piece piece, MoveOffset offset)
+        {
+            switch (offset.MoveType) {
+                case MoveType.KingCastling:
+                    foreach (var move in TryAddKingCastlingMove(pos, piece, offset))
+                        yield return move;
+                    break;
+                case MoveType.KingLongCastling:
+                    foreach (var move in TryAddKingLongCastlingMove(pos, piece, offset))
+                        yield return move;
+                    break;
+                    // другие спец. ходы
+            }
         }
 
         private IEnumerable<Position> TryAddKingCastlingMove(Position pos, Piece king, MoveOffset offset)
@@ -175,16 +183,16 @@ namespace Chess.Engine
 
         private bool CanKingCastling(Piece king)
         {
-            if(king.Color == PieceColor.White && !State.WhiteKingMoved && !State.WhiteRookH_Moved)
+            if(king.Color == PieceColor.White && !_state.WhiteKingMoved && !_state.WhiteRookH_Moved)
                 return true;
-            if (king.Color == PieceColor.Black && !State.BlackKingMoved && !State.BlackRookH_Moved)
+            if (king.Color == PieceColor.Black && !_state.BlackKingMoved && !_state.BlackRookH_Moved)
                 return true;
             return false;
         }
 
         private IEnumerable<Position> TryAddKingLongCastlingMove(Position pos, Piece king, MoveOffset offset)
         {
-            if (!CanKingCastling(king))
+            if (!CanKingLongCastling(king))
                 yield break;
 
             var delta = new MoveOffset(-1, 0, 1);
@@ -201,9 +209,9 @@ namespace Chess.Engine
 
         private bool CanKingLongCastling(Piece king)
         {
-            if (king.Color == PieceColor.White && !State.WhiteKingMoved && !State.WhiteRookA_Moved)
+            if (king.Color == PieceColor.White && !_state.WhiteKingMoved && !_state.WhiteRookA_Moved)
                 return true;
-            if (king.Color == PieceColor.Black && !State.BlackKingMoved && !State.BlackRookA_Moved)
+            if (king.Color == PieceColor.Black && !_state.BlackKingMoved && !_state.BlackRookA_Moved)
                 return true;
             return false;
         }
@@ -230,7 +238,7 @@ namespace Chess.Engine
             if (piece == null)
                 return new MoveResult(ResultStatus.Invalid);
 
-            var legalMoves = GetLegalMoves(from);
+            var legalMoves = GetLegalMoves(from).ToList();
             if (!legalMoves.Contains(to))
                 return new MoveResult(ResultStatus.Invalid);
 
@@ -241,13 +249,70 @@ namespace Chess.Engine
         public void MakeMove(Move move)
         {
             _board.Squares[move.To.Row, move.To.Col].Piece = move.Piece;
-            //move.Piece.HasMoved = true;
             _board.Squares[move.From.Row, move.From.Col].Piece = null;
 
-            //TODO изменить GameState, если нужно
-            //TODO специальные ходы. такие как "обращение пешки"
+            if (move.CapturedPiece != null) {
+                if (move.CapturedPiece.Color == PieceColor.White)
+                    _board.WhiteCaptured.Add(move.CapturedPiece);
+                else
+                    _board.BlackCaptured.Add(move.CapturedPiece);
+            }
+
+            ChangeGameState(move);
+
+            //специальные ходы.
+            //-такие как "promotion пешки"
+            //TryPromotePawn(move.Piece, move.To );
+
+            //-рокировка короля короткая
+
+            //-рокировка короля длинная
         }
 
+        public void ChangeGameState(Move move)
+        {
+            if (move.Piece is King && move.Piece.Color == PieceColor.White) {
+                _state.WhiteKingMoved = true;
+            }
+            else if (move.Piece is King && move.Piece.Color == PieceColor.Black) {
+                _state.BlackKingMoved = true;
+            }
+            else if (move.Piece is Rook && move.Piece.Color == PieceColor.White) {
+                if(move.From.Col == 0)
+                    _state.WhiteRookA_Moved = true;
+                if(move.From.Col == 7)
+                    _state.WhiteRookH_Moved = true;
+            }
+            else if (move.Piece is Rook && move.Piece.Color == PieceColor.Black) {
+                if (move.From.Col == 0)
+                    _state.BlackRookA_Moved = true;
+                if (move.From.Col == 7)
+                    _state.BlackRookH_Moved = true;
+            }
+        }
+
+        //public void TryPromotePawn(Piece piece, Position pos)
+        //{
+        //    if (piece is not Pawn pawn) 
+        //        return;
+
+        //    if (pawn.Color == PieceColor.White && pos.Row == 0)
+        //        piece = new Queen(PieceColor.White);
+        //    else if(pawn.Color == PieceColor.Black && pos.Row == 7)
+        //        piece = new Queen(PieceColor.Black);
+
+        //}
+
+        public GameState GetStateSnapshot()
+        {
+            // Можно вернуть глубокую копию
+            return _state.Clone();
+        }
+
+        public void RestoreState(GameState snapshot)
+        {
+            _state = snapshot.Clone();
+        }
 
         //IsKingInCheck(color)
         //{
