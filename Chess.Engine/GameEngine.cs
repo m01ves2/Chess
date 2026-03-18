@@ -3,6 +3,8 @@ using Chess.Domain.Pieces;
 using Chess.Engine.Results;
 using System.ComponentModel;
 using System.Drawing;
+using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
 
 namespace Chess.Engine
 {
@@ -25,60 +27,71 @@ namespace Chess.Engine
         //public GameState GetState() => _state;
 
         // Возвращает допустимые ходы фигуры с позиции currentPos
-        public IEnumerable<Position> GeneratePseudoMoves(Position currentPos)
+        private IEnumerable<Position> GeneratePseudoMoves(Position pos)
         {
-            var piece = _board.GetSquare(currentPos).Piece;
+            var piece = _board.GetSquare(pos).Piece;
 
             if (piece == null)
                 return Enumerable.Empty<Position>();
 
-            if (piece is Pawn)
-                return GeneratePawnPseudoMoves(currentPos);
-            else
-                return GenerateExceptPawnPseudoMoves(currentPos);
+
+            return piece switch
+            {
+                Pawn => GeneratePawnMoves(pos, piece),
+                _ => GenerateNotPawnMoves(pos, piece)
+            };
+
         }
-
-        public IEnumerable<Position> GeneratePawnPseudoMoves(Position currentPos)
+     
+        private IEnumerable<Position> GeneratePawnMoves(Position pos, Piece pawn)
         {
-            var piece = _board.GetSquare(currentPos).Piece;
-            var moveOffsets = piece!.GetMoveOffsets();
-
-            var possibleMoves = new List<Position>();
-            foreach (var move in moveOffsets) {
-                for (var step = 1; step <= move.MaxDistance; step++) {
-                    var possibleMove = currentPos + move * step;
-
-                    if (!_board.IsInsideBoard(possibleMove))
+            foreach (var offset in pawn.GetMoveOffsets()) {
+                switch (offset.MoveType) {
+                    case MoveType.Normal:
+                        foreach (var move in TryAddNormalPawnMove(pos, pawn, offset)) yield return move;
                         break;
-
-                    var possibleSquare = _board.GetSquare(possibleMove);
-
-                    if (possibleSquare.IsEmpty()) {
-                        possibleMoves.Add(possibleMove);
-                    }
-
-                    var diagPos1 = new Position(possibleMove.Row, possibleMove.Col - 1);
-                    var diagPos2 = new Position(possibleMove.Row, possibleMove.Col + 1);
-
-                    if (_board.IsInsideBoard(diagPos1) && step == 1) {
-                        var diagSquare1 = _board.GetSquare(diagPos1);
-                        if (diagSquare1.Piece != null && piece.Color != diagSquare1.Piece.Color)
-                            possibleMoves.Add(diagPos1);
-                    }
-                    if (_board.IsInsideBoard(diagPos2) && step == 1) {
-                        var diagSquare2 = _board.GetSquare(diagPos2);
-                        if (diagSquare2.Piece != null && piece.Color != diagSquare2.Piece.Color)
-                            possibleMoves.Add(diagPos2);
-                    }
-
-                    if (!IsPawnOnStartPosition(piece, currentPos))
+                    case MoveType.PawnFirstMove:
+                        foreach (var move in TryAddPawnFirstMove(pos, pawn, offset)) yield return move;
+                        break;
+                    case MoveType.PawnAttack:
+                        foreach (var move in TryAddPawnAttackMove(pos, pawn, offset)) yield return move;
+                        break;
+                    case MoveType.PawnEnPassant:
+                        foreach (var move in TryAddEnPassantMove(pos, pawn, offset)) yield return move;
                         break;
                 }
             }
-            return possibleMoves;
         }
 
-        bool IsPawnOnStartPosition(Piece piece, Position pos)
+        private IEnumerable<Position> TryAddNormalPawnMove(Position pos, Piece pawn, MoveOffset offset)
+        {
+            var target = pos + offset * offset.MaxDistance;
+            if (!_board.IsInsideBoard(target))
+                yield break;
+
+            if (_board.GetSquare(target).IsEmpty()) {
+                yield return target;
+            }
+        }
+
+        private IEnumerable<Position> TryAddPawnFirstMove(Position pos, Piece pawn, MoveOffset offset)
+        {
+            if (!IsPawnOnStartPosition(pos, pawn))
+                yield break;
+
+            var oneStep = pos + offset;
+            var twoSteps = oneStep + offset;
+
+            if (!_board.IsInsideBoard(twoSteps))
+                yield break;
+
+            if (_board.GetSquare(oneStep).IsEmpty() &&
+                _board.GetSquare(twoSteps).IsEmpty()) {
+                yield return twoSteps;
+            }
+        }
+
+        bool IsPawnOnStartPosition(Position pos, Piece piece)
         {
             if (piece.Color == Domain.PieceColor.White && pos.Row == 6)
                 return true;
@@ -87,34 +100,112 @@ namespace Chess.Engine
             return false;
         }
 
-        public IEnumerable<Position> GenerateExceptPawnPseudoMoves(Position currentPos)
+        private IEnumerable<Position> TryAddPawnAttackMove(Position pos, Piece pawn, MoveOffset offset)
         {
-            var piece = _board.GetSquare(currentPos).Piece;
-            var moveOffsets = piece!.GetMoveOffsets();
+            var target = pos + offset;
+            if (!_board.IsInsideBoard(target))
+                yield break;
 
+            var targetSquare = _board.GetSquare(target);
+            if (targetSquare.Piece != null && pawn.Color != targetSquare.Piece.Color)
+               yield return target;
+        }
+        private IEnumerable<Position> TryAddEnPassantMove(Position pos, Piece pawn, MoveOffset offset)
+        {
+            //TODO
+            return Enumerable.Empty<Position>();
+        }
+
+        
+
+
+        // маленькие методы для каждого типа хода
+        private IEnumerable<Position> GenerateNotPawnMoves(Position pos, Piece piece)
+        {
             var possibleMoves = new List<Position>();
-
-            foreach (var move in moveOffsets) {
-                for (var step = 1; step <= move.MaxDistance; step++) {
-                    var possibleMove = currentPos + move * step;
-
-                    if (!_board.IsInsideBoard(possibleMove))
+            foreach (var offset in piece.GetMoveOffsets()) {
+                for (int step = 1; step <= offset.MaxDistance; step++) {
+                    var target = pos + offset * step;
+                    if (!_board.IsInsideBoard(target)) 
                         break;
 
-                    var possibleSquare = _board.GetSquare(possibleMove);
-
-                    if (possibleSquare.IsEmpty()) {
-                        possibleMoves.Add(possibleMove);
+                    if (offset.MoveType == MoveType.Normal) {
+                        var targetSquare = _board.GetSquare(target);
+                        if (targetSquare.IsEmpty()) {
+                            possibleMoves.Add(target);
+                        }
+                        else {
+                            if (targetSquare.Piece!.Color != piece.Color) {
+                                possibleMoves.Add(target);
+                            }
+                            break;
+                        }
                     }
                     else {
-                        if (possibleSquare.Piece!.Color != piece.Color) {
-                            possibleMoves.Add(possibleMove);
+                        switch (offset.MoveType) {
+                            case MoveType.KingCastling:
+                                foreach (var move in TryAddKingCastlingMove(pos, piece, offset)) possibleMoves.Add(move);
+                                break;
+                            case MoveType.KingLongCastling:
+                                foreach (var move in TryAddKingLongCastlingMove(pos, piece, offset)) possibleMoves.Add(move);
+                                break;
+
+                            //возможно, еще какие то специальные ходы
                         }
-                        break;
-                    }
+                    }                
                 }
             }
             return possibleMoves;
+        }
+
+        private IEnumerable<Position> TryAddKingCastlingMove(Position pos, Piece king, MoveOffset offset)
+        {
+            if (!CanKingCastling(king))
+                yield break;
+
+            var delta = new MoveOffset(1, 0, 1);
+            var oneStep = pos + delta;
+            var twoSteps = oneStep + delta;
+
+            if (_board.GetSquare(oneStep).IsEmpty() &&
+                _board.GetSquare(twoSteps).IsEmpty()) {
+                yield return twoSteps;
+            }
+        }
+
+        private bool CanKingCastling(Piece king)
+        {
+            if(king.Color == PieceColor.White && !State.WhiteKingMoved && !State.WhiteRookH_Moved)
+                return true;
+            if (king.Color == PieceColor.Black && !State.BlackKingMoved && !State.BlackRookH_Moved)
+                return true;
+            return false;
+        }
+
+        private IEnumerable<Position> TryAddKingLongCastlingMove(Position pos, Piece king, MoveOffset offset)
+        {
+            if (!CanKingCastling(king))
+                yield break;
+
+            var delta = new MoveOffset(-1, 0, 1);
+            var oneStep = pos + delta;
+            var twoSteps = oneStep + delta;
+            var threeSteps = twoSteps + delta;
+
+            if (_board.GetSquare(oneStep).IsEmpty() &&
+                _board.GetSquare(twoSteps).IsEmpty() &&
+                _board.GetSquare(threeSteps).IsEmpty()) {
+                yield return twoSteps;
+            }
+        }
+
+        private bool CanKingLongCastling(Piece king)
+        {
+            if (king.Color == PieceColor.White && !State.WhiteKingMoved && !State.WhiteRookA_Moved)
+                return true;
+            if (king.Color == PieceColor.Black && !State.BlackKingMoved && !State.BlackRookA_Moved)
+                return true;
+            return false;
         }
 
         public IEnumerable<Position> GetLegalMoves(Position currentPos)
@@ -136,11 +227,11 @@ namespace Chess.Engine
         public MoveResult TryMove(Position from, Position to)
         {
             var piece = _board.GetSquare(from).Piece;
-            if (piece == null) 
+            if (piece == null)
                 return new MoveResult(ResultStatus.Invalid);
 
             var legalMoves = GetLegalMoves(from);
-            if (!legalMoves.Contains(to)) 
+            if (!legalMoves.Contains(to))
                 return new MoveResult(ResultStatus.Invalid);
 
             var captured = _board.GetSquare(to).Piece;
@@ -152,6 +243,9 @@ namespace Chess.Engine
             _board.Squares[move.To.Row, move.To.Col].Piece = move.Piece;
             //move.Piece.HasMoved = true;
             _board.Squares[move.From.Row, move.From.Col].Piece = null;
+
+            //TODO изменить GameState, если нужно
+            //TODO специальные ходы. такие как "обращение пешки"
         }
 
 

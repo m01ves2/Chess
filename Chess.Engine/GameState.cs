@@ -4,16 +4,16 @@ namespace Chess.Engine
 {
     public class GameState
     {
-        public bool WhiteKingMoved { get; set; }
-        public bool BlackKingMoved { get; set; }
+        public bool WhiteKingMoved { get; set; } = false;
+        public bool BlackKingMoved { get; set; } = false;
 
-        public bool WhiteRookA_Moved { get; set; }
-        public bool WhiteRookH_Moved { get; set; }
+        public bool WhiteRookA_Moved { get; set; } = false;
+        public bool WhiteRookH_Moved { get; set; } = false;
 
-        public bool BlackRookA_Moved { get; set; }
-        public bool BlackRookH_Moved { get; set; }
+        public bool BlackRookA_Moved { get; set; } = false;
+        public bool BlackRookH_Moved { get; set; } = false;
 
-        public Position? EnPassantTarget { get; set; }
+        public Position? EnPassantTarget { get; set; } = null;
 
         public GameState Clone()
         {
