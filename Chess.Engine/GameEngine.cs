@@ -99,13 +99,19 @@ namespace Chess.Engine
 
         private IEnumerable<Position> TryAddPawnAttackMove(Position pos, Piece pawn, MoveOffset offset)
         {
-            var target = pos + offset;
+            var target = pos + offset; //атака по диагонали
             if (!_board.IsInsideBoard(target))
                 yield break;
 
             var targetSquare = _board.GetSquare(target);
-            if (targetSquare.Piece != null && pawn.Color != targetSquare.Piece.Color)
-               yield return target;
+
+            if (targetSquare.Piece == null) //некого атаковать
+                yield break;
+
+            if (targetSquare.Piece.Color == pawn.Color) //нельзя атаковать своих
+                yield break;
+
+            yield return target;
         }
         private IEnumerable<Position> TryAddEnPassantMove(Position pos, Piece pawn, MoveOffset offset)
         {
@@ -113,7 +119,7 @@ namespace Chess.Engine
             return Enumerable.Empty<Position>();
         }
 
-        
+
 
 
         // маленькие методы для каждого типа хода
@@ -121,15 +127,22 @@ namespace Chess.Engine
         {
             foreach (var offset in piece.GetMoveOffsets()) {
                 if (offset.MoveType == MoveType.Normal) {
-                    for (int step = 1; step <= offset.MaxDistance; step++) {
-                        foreach (var move in GenerateStepMove(pos, piece, offset, step))
-                            yield return move;
-                    }
-                }
-                else {
-                    foreach (var move in GenerateSpecialMove(pos, piece, offset))
+                    foreach (var move in GenerateSlidingMoves(pos, piece, offset))
                         yield return move;
+
+                    continue;
                 }
+
+                foreach (var move in GenerateSpecialMove(pos, piece, offset))
+                    yield return move;
+            }
+        }
+
+        private IEnumerable<Position> GenerateSlidingMoves(Position pos, Piece piece, MoveOffset offset)
+        {
+            for (int step = 1; step <= offset.MaxDistance; step++) {
+                foreach (var move in GenerateStepMove(pos, piece, offset, step))
+                    yield return move;
             }
         }
 
@@ -144,7 +157,7 @@ namespace Chess.Engine
             }
             else if (square.Piece.Color != piece.Color) {
                 yield return target;
-                yield break; // дальше по этому направлению фигура идти не может
+                yield break; // дальше по этому направлению фигура идти не может!
             }
             else {
                 yield break; // своя фигура — путь закрыт
@@ -175,10 +188,13 @@ namespace Chess.Engine
             var oneStep = pos + delta;
             var twoSteps = oneStep + delta;
 
-            if (_board.GetSquare(oneStep).IsEmpty() &&
-                _board.GetSquare(twoSteps).IsEmpty()) {
-                yield return twoSteps;
-            }
+            if (!_board.GetSquare(oneStep).IsEmpty())
+                yield break;
+
+            if (!_board.GetSquare(twoSteps).IsEmpty())
+                yield break;
+
+            yield return twoSteps;
         }
 
         private bool CanKingCastling(Piece king)
