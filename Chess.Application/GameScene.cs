@@ -10,6 +10,9 @@ namespace Chess.Application
         public Player PlayerBlack { get; set; }
         public List<Move> MoveHistory { get; set; } = new List<Move>();
 
+        public bool WhiteKingInCheck { get; set; } = false;
+        public bool BlackKingInCheck { get; set; } = false;
+
         // Добавляем состояние сцены для UI
         // UI / игровое состояние
         public Position Cursor { get; set; } = new Position(0, 0); // позиция курсора

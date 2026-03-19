@@ -40,15 +40,17 @@ namespace Chess.UI.CLI
     //rotatedCol = 7 - col;
     public class CLIBoardRenderer : IBoardRenderer
     {
-        public void Render(GameScene game)
+        public void Render(GameScene gameScene)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.SetCursorPosition(0, 0);
             Console.CursorVisible = false;
 
             RenderFiles();
-            RenderBoard(game);
+            RenderBoard(gameScene);
             RenderRanks();
+
+            RenderKingInCheckMessage(gameScene);
         }
 
         public void RenderFiles()
@@ -170,9 +172,20 @@ namespace Chess.UI.CLI
             _ => '?'
         };
 
-        Position Rotate180(Position pos)
+        private Position Rotate180(Position pos)
         {
             return new Position(7 - pos.Row, 7 - pos.Col);
+        }
+
+        private void RenderKingInCheckMessage(GameScene game)
+        {
+            Console.SetCursorPosition(40, 10);
+            if (game.BlackKingInCheck) {
+                Console.WriteLine("Black King in check!");
+            }
+            else if (game.WhiteKingInCheck) {
+                Console.WriteLine("White King in check!");
+            }
         }
     }
 }

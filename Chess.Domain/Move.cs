@@ -7,7 +7,7 @@
         public Position To { get; }
         public Piece Piece { get; }
         public Piece? CapturedPiece { get; }
-        //public Piece? PromotionTo { get; } // вот это ключ
+        //public Piece? PromotionTo { get; }
 
         public Move(Position from, Position to, Piece piece, Piece? capturedPiece = null)
         {

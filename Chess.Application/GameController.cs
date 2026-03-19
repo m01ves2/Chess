@@ -1,12 +1,9 @@
-﻿using Chess.Application.Interfaces;
-using Chess.Domain;
+﻿using Chess.Domain;
 using Chess.Engine;
 using Chess.Engine.Results;
 
 namespace Chess.Application
 {
-    //Управлять состоянием игры: вызывать методы Game для совершения ходов, проверять правила.
-    //Обеспечивать API для GameLoop: предоставлять текущую доску, подсвеченные возможные ходы, текущего игрока и т.д.
     public class GameController
     {
         private readonly GameScene _gameScene;
@@ -76,16 +73,17 @@ namespace Chess.Application
             
             if (selectedSquare.Piece?.Color == _gameScene.CurrentPlayer) {//выделили клетку
                 _gameScene.SelectedPosition = position;
-                _gameScene.HighlightedPositions.AddRange(_gameEngine.GetLegalMoves(position));
+                var moves = _gameEngine.GetLegalMoves(position).ToList();
+                moves.ForEach(m => _gameScene.HighlightedPositions.Add(m.To));
                 return;
             }
 
             if (_gameScene.SelectedPosition != null) {
-                TryMakeMove((Position)_gameScene.SelectedPosition!, position);
+                TryMakeMove((Position)_gameScene.SelectedPosition!, position); //TODO
             }
         }
 
-        public void TryMakeMove(Position from, Position to)
+        public void TryMakeMove(Position from, Position to) //TODO
         {
 
             var result = _gameEngine.TryMove(from, to);
@@ -94,6 +92,11 @@ namespace Chess.Application
                 var capturedPiece = result.CapturedPiece;
                 var move = new Move(from, to, piece, capturedPiece);
                 DoMove(move); // snapshot делаем здесь, MakeMove вызывается здесь один раз
+
+                //ResetKingInCheck();
+                //if (IsKingInCheck()) {
+                //    UndoMove();
+                //}
             }
             // Сбрасываем выделение независимо от результата
             _gameScene.SelectedPosition = null;
@@ -115,6 +118,8 @@ namespace Chess.Application
             _gameEngine.MakeMove(move);      // применяем ход один раз
             _gameScene.MoveHistory.Add(move);
             SwitchPlayer();
+
+            //IsKingInCheck(); //сразу же проверка, что соперник поставил нам шах
         }
 
         public void UndoMove()
@@ -151,6 +156,12 @@ namespace Chess.Application
             var newPosition = new Position(_gameScene.Cursor.Row + dRow, _gameScene.Cursor.Col + dCol);
             if (_gameScene.Board.IsInsideBoard(newPosition))
                 _gameScene.Cursor = newPosition;
+        }
+
+        private void UpdateCheckStatus()
+        {
+            _gameScene.WhiteKingInCheck = _gameEngine.IsKingInCheck(PieceColor.White);
+            _gameScene.BlackKingInCheck = _gameEngine.IsKingInCheck(PieceColor.Black);
         }
 
         public bool IsGameOver()
