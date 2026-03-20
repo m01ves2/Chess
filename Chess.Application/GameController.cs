@@ -1,6 +1,5 @@
 ﻿using Chess.Domain;
 using Chess.Engine;
-using Chess.Engine.Results;
 
 namespace Chess.Application
 {
@@ -79,27 +78,20 @@ namespace Chess.Application
             }
 
             if (_gameScene.SelectedPosition != null) {
-                TryMakeMove((Position)_gameScene.SelectedPosition!, position); //TODO
+                TryMakeMove(_gameScene.SelectedPosition.Value, position);
+                _gameScene.SelectedPosition = null;
             }
         }
 
-        public void TryMakeMove(Position from, Position to) //TODO
+        public void TryMakeMove(Position from, Position to)
         {
+            var moves = _gameEngine.GetLegalMoves(from);
+            var move = moves.FirstOrDefault(m => m.To == to);
 
-            var result = _gameEngine.TryMove(from, to);
-            if (result.Status == ResultStatus.Success) {
-                var piece = _gameScene.Board.GetSquare(from).Piece!;
-                var capturedPiece = result.CapturedPiece;
-                var move = new Move(from, to, piece, capturedPiece);
-                DoMove(move); // snapshot делаем здесь, MakeMove вызывается здесь один раз
+            if (move == null)
+                return;
 
-                //ResetKingInCheck();
-                //if (IsKingInCheck()) {
-                //    UndoMove();
-                //}
-            }
-            // Сбрасываем выделение независимо от результата
-            _gameScene.SelectedPosition = null;
+            DoMove(move);
         }
 
 

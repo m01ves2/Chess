@@ -1,6 +1,5 @@
 ﻿using Chess.Domain;
 using Chess.Domain.Pieces;
-using Chess.Engine.Results;
 
 namespace Chess.Engine
 {
@@ -22,41 +21,17 @@ namespace Chess.Engine
 
         //public GameState GetState() => _state;
 
-        public IEnumerable<Move> GetLegalMoves(Position currentPos)
+        public IEnumerable<Move> GetLegalMoves(Position from)
         {
-            //TODO обработка срубания
-            var pseudoMoves = GeneratePseudoMoves(currentPos);
-            //simulate move
-            //IsKingInCheck
+            var pseudoMoves = GeneratePseudoMoves(from);
 
-            //GetLegalMoves
-            //foreach move in GetPseudoMoves
-            //    simulate
-            //if !kingInCheck
-            //    add
-
-
-
-            //var pseudoMovies = GeneratePseudoMoves(currentPos);
-            //var piece = _board.GetSquare(currentPos).Piece;
-            //foreach (var move in pseudoMovies) {
-            //    if(!IsKingInCheck(piece.Color))
-            //        yield return move;
-            //}
-            return pseudoMoves;
-        }
-
-        public MoveResult TryMove(Move move)
-        {
-            var piece = move.Piece;
-            if (piece == null)
-                return new MoveResult(ResultStatus.Invalid);
-
-            var legalMoves = GetLegalMoves(move.From).ToList(); //TODO
-            if (!legalMoves.Contains(move))
-                return new MoveResult(ResultStatus.Invalid);
-
-            return new MoveResult(ResultStatus.Success, move.CapturedPiece);
+            var piece = _board.GetSquare(from).Piece;
+            foreach (var move in pseudoMoves) {
+                if (!WouldBeCheck(move)) {
+                    yield return move;
+                    continue;
+                }
+            }
         }
 
         private IEnumerable<Move> GeneratePseudoMoves(Position pos)
@@ -269,8 +244,9 @@ namespace Chess.Engine
                     _board.BlackCaptured.Add(move.CapturedPiece);
             }
 
-            ChangeGameState(move);
+            UpdateGameState(move);
 
+            //TODO
             //специальные ходы.
             //-такие как "promotion пешки"
             //TryPromotePawn(move.Piece, move.To );
@@ -280,7 +256,7 @@ namespace Chess.Engine
             //-рокировка короля длинная
         }
 
-        public void ChangeGameState(Move move)
+        public void UpdateGameState(Move move)
         {
             if (move.Piece is King && move.Piece.Color == PieceColor.White) {
                 _state.WhiteKingMoved = true;
@@ -325,17 +301,6 @@ namespace Chess.Engine
             _state = snapshot.Clone();
         }
 
-        //IsKingInCheck(color)
-        //{
-        //    kingPosition = FindKing(color)
-
-        //    foreach enemyPiece
-        //        if enemyPseudoMoves contains kingPosition
-        //            return true
-
-        //    return false
-        //}
-
         public bool IsKingInCheck(PieceColor color)
         {
             var kingSquare = FindKingSquare(color);
@@ -344,9 +309,9 @@ namespace Chess.Engine
                 var piece = square.Piece;
                 if (piece == null || piece.Color == color) continue;
 
-                var positions = GeneratePseudoMoves(square.Position);
-                
-                if( positions.Contains(kingSquare.Position))
+                var moves = GeneratePseudoMoves(square.Position).ToList();
+
+                if (moves.Any(m => m.To == kingSquare!.Position))
                     return true;
             }
 
@@ -361,17 +326,14 @@ namespace Chess.Engine
             return null;
         }
 
-        //public bool WouldBeCheck(Move move)
-        //{
-        //    var snapshot = CreateSnapshot();
-
-        //    ApplyMove(move);
-
-        //    bool result = IsKingInCheck(_currentPlayer);
-
-        //    Restore(snapshot);
-
-        //    return result;
-        //}
+        public bool WouldBeCheck(Move move)
+        {
+            var testBoard = _board.Clone();
+            var testEngine = new GameEngine(testBoard);
+            
+            testEngine.MakeMove(move);
+            
+            return IsKingInCheck(move.Piece.Color);
+        }
     }
 }
