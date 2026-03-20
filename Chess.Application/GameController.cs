@@ -98,7 +98,7 @@ namespace Chess.Application
         private GameSnapshot CreateSnapshot()
         {
             var boardCopy = _gameScene.Board.Clone();        // глубокая копия
-            var stateCopy = _gameEngine.GetStateSnapshot();        // тоже копия
+            var stateCopy = _gameEngine.MakeStateSnapshot();        // тоже копия
             var playerCopy = _gameScene.CurrentPlayer;
 
             return new GameSnapshot(boardCopy, stateCopy, playerCopy);
@@ -110,8 +110,7 @@ namespace Chess.Application
             _gameEngine.MakeMove(move);      // применяем ход один раз
             _gameScene.MoveHistory.Add(move);
             SwitchPlayer();
-
-            //IsKingInCheck(); //сразу же проверка, что соперник поставил нам шах
+            UpdateCheckStatus();
         }
 
         public void UndoMove()

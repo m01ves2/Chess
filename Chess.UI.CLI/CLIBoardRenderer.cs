@@ -51,6 +51,7 @@ namespace Chess.UI.CLI
             RenderRanks();
 
             RenderKingInCheckMessage(gameScene);
+            RenderMoveHistory(gameScene.MoveHistory);
         }
 
         public void RenderFiles()
@@ -179,12 +180,26 @@ namespace Chess.UI.CLI
 
         private void RenderKingInCheckMessage(GameScene game)
         {
-            Console.SetCursorPosition(40, 10);
+            Console.SetCursorPosition(40, 3);
             if (game.BlackKingInCheck) {
-                Console.WriteLine("Black King in check!");
+                Console.WriteLine("Black King is in check!");
             }
             else if (game.WhiteKingInCheck) {
-                Console.WriteLine("White King in check!");
+                Console.WriteLine("White King is in check!");
+            }
+            else {
+                Console.WriteLine("                       "); //TODO
+            }
+        }
+
+        private void RenderMoveHistory(List<Move> history)
+        {
+            Console.SetCursorPosition(40, 5);
+            Console.WriteLine("Move history: ");
+            for(int i = 0; i < history.Count; i++) {
+                Console.SetCursorPosition(40, 6 + i);
+                Console.WriteLine($"#{i + 1}. {NotationMapper.PositionToString(history[i].From)} - {NotationMapper.PositionToString(history[i].To)} " + 
+                                    (history[i].CapturedPiece == null ? "": $"captured: {history[i].CapturedPiece}"));
             }
         }
     }

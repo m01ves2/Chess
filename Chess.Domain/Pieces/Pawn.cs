@@ -20,5 +20,10 @@ namespace Chess.Domain.Pieces
                                       new MoveOffset(-1, dir, 1, MoveType.PawnAttack),
             };
         }
+
+        public override string ToString()
+        {
+            return base.ToString() + " pawn";
+        }
     }
 }

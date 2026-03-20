@@ -16,6 +16,11 @@
         // Функция возвращает потенциальные ходы
         public abstract IEnumerable<MoveOffset> GetMoveOffsets();
         public abstract Piece Clone();
-    }
 
+        public override string ToString()
+        {
+            return Color.ToString();
+        }
+
+    }
 }

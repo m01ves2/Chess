@@ -23,5 +23,10 @@ namespace Chess.Domain.Pieces
                                         new MoveOffset(-1, -1, 7)
             };
         }
+
+        public override string ToString()
+        {
+            return base.ToString() + " queen";
+        }
     }
 }

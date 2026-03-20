@@ -18,14 +18,11 @@ namespace Chess.Engine
             _board = board;
         }
 
-
         //public GameState GetState() => _state;
 
         public IEnumerable<Move> GetLegalMoves(Position from)
         {
             var pseudoMoves = GeneratePseudoMoves(from);
-
-            var piece = _board.GetSquare(from).Piece;
             foreach (var move in pseudoMoves) {
                 if (!WouldBeCheck(move)) {
                     yield return move;
@@ -42,37 +39,37 @@ namespace Chess.Engine
                 yield break;
 
             if (piece is Pawn) {
-                foreach (var move in GeneratePawnMoves(pos, piece))
+                foreach (var move in AddPawnMoves(pos, piece))
                     yield return move;
             }
             else {
-                foreach (var move in GenerateNotPawnMoves(pos, piece))
+                foreach (var move in AddNotPawnMoves(pos, piece))
                     yield return move;
             }
 
         }
      
         //методы для хода пешки
-        private IEnumerable<Move> GeneratePawnMoves(Position pos, Piece pawn)
+        private IEnumerable<Move> AddPawnMoves(Position pos, Piece pawn)
         {
             foreach (var offset in pawn.GetMoveOffsets()) {
                 switch (offset.MoveType) {
                     case MoveType.Normal:
-                        foreach (var move in TryAddNormalPawnMove(pos, pawn, offset)) yield return move;
+                        foreach (var move in AddNormalPawnMove(pos, pawn, offset)) yield return move;
                         break;
                     case MoveType.PawnFirstMove:
-                        foreach (var move in TryAddPawnDoubleMove(pos, pawn, offset)) yield return move;
+                        foreach (var move in AddPawnDoubleMove(pos, pawn, offset)) yield return move;
                         break;
                     case MoveType.PawnAttack:
-                        foreach (var move in TryAddPawnAttackMove(pos, pawn, offset)) yield return move;
+                        foreach (var move in AddPawnAttackMove(pos, pawn, offset)) yield return move;
                         break;
                     case MoveType.PawnEnPassant:
-                        foreach (var move in TryAddEnPassantMove(pos, pawn, offset)) yield return move;
+                        foreach (var move in AddEnPassantMove(pos, pawn, offset)) yield return move;
                         break;
                 }
             }
         }
-        private IEnumerable<Move> TryAddNormalPawnMove(Position pos, Piece pawn, MoveOffset offset)
+        private IEnumerable<Move> AddNormalPawnMove(Position pos, Piece pawn, MoveOffset offset)
         {
             var oneStep = pos + offset * offset.MaxDistance;
             if (!_board.IsInsideBoard(oneStep))
@@ -82,7 +79,7 @@ namespace Chess.Engine
                 yield return new Move(pos, oneStep, pawn);
             }
         }
-        private IEnumerable<Move> TryAddPawnDoubleMove(Position pos, Piece pawn, MoveOffset offset)
+        private IEnumerable<Move> AddPawnDoubleMove(Position pos, Piece pawn, MoveOffset offset)
         {
             if (!IsPawnOnStartPosition(pos, pawn))
                 yield break;
@@ -106,7 +103,7 @@ namespace Chess.Engine
                 return true;
             return false;
         }
-        private IEnumerable<Move> TryAddPawnAttackMove(Position pos, Piece pawn, MoveOffset offset)
+        private IEnumerable<Move> AddPawnAttackMove(Position pos, Piece pawn, MoveOffset offset)
         {
             var target = pos + offset; //атака по диагонали
             if (!_board.IsInsideBoard(target))
@@ -122,7 +119,7 @@ namespace Chess.Engine
 
             yield return new Move(pos, target, pawn, targetSquare.Piece);
         }
-        private IEnumerable<Move> TryAddEnPassantMove(Position pos, Piece pawn, MoveOffset offset)
+        private IEnumerable<Move> AddEnPassantMove(Position pos, Piece pawn, MoveOffset offset)
         {
             //TODO
             return Enumerable.Empty<Move>();
@@ -130,21 +127,21 @@ namespace Chess.Engine
 
 
         //  методы для хода не пешки
-        private IEnumerable<Move> GenerateNotPawnMoves(Position pos, Piece piece)
+        private IEnumerable<Move> AddNotPawnMoves(Position pos, Piece piece)
         {
             foreach (var offset in piece.GetMoveOffsets()) {
                 if (offset.MoveType == MoveType.Normal) {
-                    foreach (var move in GenerateSlidingMoves(pos, piece, offset))
+                    foreach (var move in AddNotPawnNormalMoves(pos, piece, offset))
                         yield return move;
 
                     continue;
                 }
 
-                foreach (var move in GenerateSpecialMove(pos, piece, offset))
+                foreach (var move in AddNotPawnSpecialMove(pos, piece, offset))
                     yield return move;
             }
         }
-        private IEnumerable<Move> GenerateSlidingMoves(Position pos, Piece piece, MoveOffset offset)
+        private IEnumerable<Move> AddNotPawnNormalMoves(Position pos, Piece piece, MoveOffset offset)
         {
             for (int step = 1; step <= offset.MaxDistance; step++) {
                 var target = pos + offset * step;
@@ -167,21 +164,21 @@ namespace Chess.Engine
                 yield break;
             }
         }
-        private IEnumerable<Move> GenerateSpecialMove(Position pos, Piece piece, MoveOffset offset)
+        private IEnumerable<Move> AddNotPawnSpecialMove(Position pos, Piece piece, MoveOffset offset)
         {
             switch (offset.MoveType) {
                 case MoveType.KingCastling:
-                    foreach (var move in TryAddKingCastlingMove(pos, piece, offset))
+                    foreach (var move in AddKingCastlingMove(pos, piece, offset))
                         yield return move;
                     break;
                 case MoveType.KingLongCastling:
-                    foreach (var move in TryAddKingLongCastlingMove(pos, piece, offset))
+                    foreach (var move in AddKingLongCastlingMove(pos, piece, offset))
                         yield return move;
                     break;
                     // другие спец. ходы
             }
         }
-        private IEnumerable<Move> TryAddKingCastlingMove(Position pos, Piece king, MoveOffset offset)
+        private IEnumerable<Move> AddKingCastlingMove(Position pos, Piece king, MoveOffset offset)
         {
             if (!CanKingCastling(king))
                 yield break;
@@ -206,7 +203,7 @@ namespace Chess.Engine
                 return true;
             return false;
         }
-        private IEnumerable<Move> TryAddKingLongCastlingMove(Position pos, Piece king, MoveOffset offset)
+        private IEnumerable<Move> AddKingLongCastlingMove(Position pos, Piece king, MoveOffset offset)
         {
             if (!CanKingLongCastling(king))
                 yield break;
@@ -278,7 +275,7 @@ namespace Chess.Engine
             }
         }
 
-        //public void TryPromotePawn(Piece piece, Position pos)
+        //public void AddPromotePawn(Piece piece, Position pos)
         //{
         //    if (piece is not Pawn pawn) 
         //        return;
@@ -290,7 +287,7 @@ namespace Chess.Engine
 
         //}
 
-        public GameState GetStateSnapshot()
+        public GameState MakeStateSnapshot()
         {
             // Можно вернуть глубокую копию
             return _state.Clone();
@@ -332,8 +329,7 @@ namespace Chess.Engine
             var testEngine = new GameEngine(testBoard);
             
             testEngine.MakeMove(move);
-            
-            return IsKingInCheck(move.Piece.Color);
+            return testEngine.IsKingInCheck(move.Piece.Color);
         }
     }
 }

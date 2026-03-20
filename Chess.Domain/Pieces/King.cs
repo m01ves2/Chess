@@ -28,5 +28,10 @@ namespace Chess.Domain.Pieces
                                         new MoveOffset(-4, 0, 1, MoveType.KingLongCastling ),
             };
         }
+
+        public override string ToString()
+        {
+            return base.ToString() + " king";
+        }
     }
 }
