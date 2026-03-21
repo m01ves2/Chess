@@ -1,7 +1,5 @@
 ﻿using Chess.Application;
 using Chess.Application.Interfaces;
-using Chess.Domain;
-using Chess.Engine;
 using Chess.UI.CLI;
 
 namespace Chess.CompositionRoot

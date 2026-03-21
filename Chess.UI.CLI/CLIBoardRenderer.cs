@@ -1,6 +1,7 @@
 ﻿using Chess.Application;
 using Chess.Application.Interfaces;
 using Chess.Domain;
+using Chess.Domain.Moves;
 using Chess.Domain.Pieces;
 using System.Security.Cryptography;
 
@@ -196,10 +197,16 @@ namespace Chess.UI.CLI
         {
             Console.SetCursorPosition(40, 5);
             Console.WriteLine("Move history: ");
-            for(int i = 0; i < history.Count; i++) {
+            for (int i = 0; i < history.Count; i++) {
                 Console.SetCursorPosition(40, 6 + i);
-                Console.WriteLine($"#{i + 1}. {NotationMapper.PositionToString(history[i].From)} - {NotationMapper.PositionToString(history[i].To)} " + 
-                                    (history[i].CapturedPiece == null ? "": $"captured: {history[i].CapturedPiece}"));
+                Console.Write($"#{i + 1}.{NotationMapper.PositionToString(history[i].From)} - {NotationMapper.PositionToString(history[i].To)}");
+
+                if (history[i] is NormalMove nm) {
+                    Console.WriteLine(nm.CapturedPiece == null ? " " : $" (captured: {nm.CapturedPiece}) ");
+                }
+                else if (history[i] is EnPassantMove ep) {
+                    Console.WriteLine( $" (captured: {ep.CapturedPiece}) ");
+                }
             }
         }
     }

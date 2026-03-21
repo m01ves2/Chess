@@ -1,6 +1,6 @@
 ﻿using Chess.Domain;
 
-namespace Chess.Engine
+namespace Chess.Domain
 {
     public class GameState
     {

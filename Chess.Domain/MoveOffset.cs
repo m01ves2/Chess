@@ -36,17 +36,3 @@
         }
     }
 }
-
-//алгоритм построения клеток по направлениям
-//foreach offset in piece.Offsets
-//    for step = 1..offset.MaxDistance
-//        target = currentPos + offset * step
-//        if target вне доски → break
-//        square = board.GetSquare(target)
-//        if square.Piece == null
-//            legalMoves.Add(target)
-//        else if square.Piece.Color != piece.Color
-//            legalMoves.Add(target)
-//            break
-//        else // союзная фигура
-//    break

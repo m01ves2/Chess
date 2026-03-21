@@ -1,4 +1,5 @@
 ﻿using Chess.Domain;
+using Chess.Domain.Moves;
 using Chess.Domain.Pieces;
 
 namespace Chess.Engine
@@ -76,7 +77,7 @@ namespace Chess.Engine
                 yield break;
 
             if (_board.GetSquare(oneStep).IsEmpty()) {
-                yield return new Move(pos, oneStep, pawn);
+                yield return new NormalMove(pos, oneStep, pawn);
             }
         }
         private IEnumerable<Move> AddPawnDoubleMove(Position pos, Piece pawn, MoveOffset offset)
@@ -92,7 +93,7 @@ namespace Chess.Engine
 
             if (_board.GetSquare(oneStep).IsEmpty() &&
                 _board.GetSquare(twoSteps).IsEmpty()) {
-                yield return new Move(pos, twoSteps, pawn);
+                yield return new PawnDoubleMove(pos, twoSteps, pawn, oneStep);
             }
         }
         bool IsPawnOnStartPosition(Position pos, Piece piece)
@@ -117,12 +118,23 @@ namespace Chess.Engine
             if (targetSquare.Piece.Color == pawn.Color) //нельзя атаковать своих
                 yield break;
 
-            yield return new Move(pos, target, pawn, targetSquare.Piece);
+            yield return new NormalMove(pos, target, pawn, targetSquare.Piece);
         }
         private IEnumerable<Move> AddEnPassantMove(Position pos, Piece pawn, MoveOffset offset)
         {
-            //TODO
-            return Enumerable.Empty<Move>();
+            if(_state.EnPassantTarget == null) 
+                yield break; //некого атаковать
+
+            var enPassantTarget = _state.EnPassantTarget;
+            var enPassantTargetSquare = _board.GetSquare( enPassantTarget.Value);
+            var step = pos + offset;
+            if (enPassantTarget == step) {
+                var capturedPiecePosition = new Position(pos.Row, step.Col);
+                var capturedPiece = _board.GetSquare(capturedPiecePosition).Piece!;
+                yield return new EnPassantMove(pos, step, pawn, capturedPiecePosition, capturedPiece);
+            }
+            
+            yield break;
         }
 
 
@@ -152,13 +164,13 @@ namespace Chess.Engine
                 var targetSquare = _board.GetSquare(target);
 
                 if (targetSquare.IsEmpty()) {
-                    yield return new Move(pos, target, piece);
+                    yield return new NormalMove(pos, target, piece);
 
                     continue;
                 }
 
                 if (targetSquare.Piece.Color != piece.Color) {
-                    yield return new Move(pos, target, piece, targetSquare.Piece);
+                    yield return new NormalMove(pos, target, piece, targetSquare.Piece);
                 }
 
                 yield break;
@@ -193,7 +205,7 @@ namespace Chess.Engine
             if (!_board.GetSquare(twoSteps).IsEmpty())
                 yield break;
 
-            yield return new Move(pos, twoSteps, king); //TODO
+            yield return new KingCastlingMove(pos, twoSteps, king); //TODO
         }
         private bool CanKingCastling(Piece king)
         {
@@ -216,7 +228,7 @@ namespace Chess.Engine
             if (_board.GetSquare(oneStep).IsEmpty() &&
                 _board.GetSquare(twoSteps).IsEmpty() &&
                 _board.GetSquare(threeSteps).IsEmpty()) {
-                yield return new Move(pos, twoSteps, king); //TODO
+                yield return new KingCastlingMove(pos, twoSteps, king); //TODO
             }
         }
         private bool CanKingLongCastling(Piece king)
@@ -229,18 +241,19 @@ namespace Chess.Engine
         }
 
 
-        public void MakeMove(Move move)
+        public void MakeMove(Move move) //TODO
         {
-            _board.Squares[move.To.Row, move.To.Col].Piece = move.Piece;
-            _board.Squares[move.From.Row, move.From.Col].Piece = null;
+            //_board.Squares[move.To.Row, move.To.Col].Piece = move.Piece;
+            //_board.Squares[move.From.Row, move.From.Col].Piece = null;
 
-            if (move.CapturedPiece != null) {
-                if (move.CapturedPiece.Color == PieceColor.White)
-                    _board.WhiteCaptured.Add(move.CapturedPiece);
-                else
-                    _board.BlackCaptured.Add(move.CapturedPiece);
-            }
-
+            //if (move.CapturedPiece != null) {
+            //    if (move.CapturedPiece.Color == PieceColor.White)
+            //        _board.WhiteCaptured.Add(move.CapturedPiece);
+            //    else
+            //        _board.BlackCaptured.Add(move.CapturedPiece);
+            //}
+            _state.EnPassantTarget = null;
+            move.Apply(_board, _state);
             UpdateGameState(move);
 
             //TODO

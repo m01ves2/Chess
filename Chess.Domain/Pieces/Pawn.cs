@@ -18,6 +18,8 @@ namespace Chess.Domain.Pieces
                                       new MoveOffset( 0, dir, 2, MoveType.PawnFirstMove),
                                       new MoveOffset( 1, dir, 1, MoveType.PawnAttack),
                                       new MoveOffset(-1, dir, 1, MoveType.PawnAttack),
+                                      new MoveOffset( 1, dir, 1, MoveType.PawnEnPassant),
+                                      new MoveOffset(-1, dir, 1, MoveType.PawnEnPassant),
             };
         }
 

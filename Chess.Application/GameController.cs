@@ -9,7 +9,7 @@ namespace Chess.Application
         private readonly GameEngine _gameEngine;
         private bool _isGameOver = false;
         public GameScene CurrentGameState => _gameScene;
-        private Stack<GameSnapshot> _history = new Stack<GameSnapshot>();
+        private Stack<GameSnapshot> _SnapshotHistory = new Stack<GameSnapshot>();
 
         public GameController(GameScene gameScene)
         {
@@ -17,7 +17,7 @@ namespace Chess.Application
             _gameEngine = new GameEngine(_gameScene.Board);
 
             // добавляем стартовый snapshot в стек
-            _history.Push(CreateSnapshot());
+            _SnapshotHistory.Push(CreateSnapshot());
         }
         // Обработка действия игрока
         public void ProcessAction(PlayerAction action)
@@ -106,7 +106,7 @@ namespace Chess.Application
 
         public void DoMove(Move move)
         {
-            _history.Push(CreateSnapshot()); // snapshot ДО хода
+            _SnapshotHistory.Push(CreateSnapshot()); // snapshot ДО хода
             _gameEngine.MakeMove(move);      // применяем ход один раз
             _gameScene.MoveHistory.Add(move);
             SwitchPlayer();
@@ -117,9 +117,13 @@ namespace Chess.Application
         {
             _gameScene.SelectedPosition = null;
             _gameScene.HighlightedPositions.Clear();
-            if (_history.Count > 0) {
-                var snapshot = _history.Pop();
-
+            if (_SnapshotHistory.Count > 0) {
+                var snapshot = _SnapshotHistory.Pop();
+                
+                if (_gameScene.MoveHistory.Count > 0) {
+                    _gameScene.MoveHistory.Remove(_gameScene.MoveHistory.Last());
+                }
+                
                 _gameScene.Board = snapshot.Board;
                 _gameEngine.UpdateBoard(_gameScene.Board);
                 _gameEngine.RestoreState(snapshot.State);
