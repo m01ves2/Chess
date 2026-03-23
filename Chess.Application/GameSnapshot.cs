@@ -1,6 +1,6 @@
 ﻿using Chess.Domain;
 
-namespace Chess.Engine
+namespace Chess.Application
 {
     public class GameSnapshot
     {
@@ -13,6 +13,11 @@ namespace Chess.Engine
             Board = board;
             State = state;
             CurrentPlayer = currentPlayer;
+        }
+
+        public GamePosition ToGamePosition()
+        {
+            return new GamePosition(Board, State, CurrentPlayer);
         }
     }
 }

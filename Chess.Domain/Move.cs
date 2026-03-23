@@ -13,6 +13,6 @@
             Piece = piece;
         }
 
-        public abstract void Apply(Board board, GameState state);
+        public abstract void Apply(GamePosition gamePosition);
     }
 }

@@ -23,9 +23,8 @@ namespace Chess.Domain.Pieces
                                         new MoveOffset(-1, -1, 1), 
                                         new MoveOffset(-1, 1, 1), 
                                         new MoveOffset(1, -1, 1),
-                                        //TODO add KingCastling
-                                        new MoveOffset(3, 0, 1, MoveType.KingCastling ),
-                                        new MoveOffset(-4, 0, 1, MoveType.KingLongCastling ),
+                                        new MoveOffset(2, 0, 1, MoveType.KingCastling ),
+                                        new MoveOffset(-2, 0, 1, MoveType.KingLongCastling ),
             };
         }
 

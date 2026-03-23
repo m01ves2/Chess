@@ -12,7 +12,7 @@ namespace Chess.CompositionRoot
             IBoardRenderer renderer = new CLIBoardRenderer();
             IInputHandler inputHandler = new CLIInputHandler();
 
-            GameController gameController = new GameController(game);
+            GameController gameController = new GameController();
             GameLoop gameLoop = new GameLoop(gameController, renderer, inputHandler);
             gameLoop.Run();
         }

@@ -55,7 +55,12 @@ namespace Chess.Domain
             Squares[7, 4].Piece = new King(PieceColor.White);
         }
 
-        public Square GetSquare(Position pos) => Squares[pos.Row, pos.Col];
+        public Square GetSquare(Position pos)
+        {
+            if (pos.Row < 0 || pos.Row > 7 || pos.Col < 0 || pos.Col > 7)
+                throw new ArgumentOutOfRangeException($"Invalid board position: {pos.Row},{pos.Col}\nStack:\n{Environment.StackTrace}");
+            return Squares[pos.Row, pos.Col];
+        }
         public Position GetPosition(int row, int col) => Squares[row, col].Position;
         public bool IsInsideBoard(Position pos) => pos.Row >= 0 && pos.Row < 8 && pos.Col >= 0 && pos.Col < 8;
 

@@ -10,8 +10,9 @@
             CapturedPiece = capturedPiece;
         }
 
-        public override void Apply(Board board, GameState state)
+        public override void Apply(GamePosition gamePosition)
         {
+            var board = gamePosition.Board;
             board.Squares[To.Row, To.Col].Piece = Piece;
             board.Squares[From.Row, From.Col].Piece = null;
             
