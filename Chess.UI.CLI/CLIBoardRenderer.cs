@@ -41,14 +41,14 @@ namespace Chess.UI.CLI
     //rotatedCol = 7 - col;
     public class CLIBoardRenderer : IBoardRenderer
     {
-        public void Render(GameScene gameScene)
+        public void Render(GamePosition gamePosition, GameScene gameScene)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.SetCursorPosition(0, 0);
             Console.CursorVisible = false;
 
             RenderFiles();
-            RenderBoard(gameScene);
+            RenderBoard(gamePosition, gameScene);
             RenderRanks();
 
             RenderKingInCheckMessage(gameScene);
@@ -80,23 +80,23 @@ namespace Chess.UI.CLI
             }
         }
 
-        private void RenderBoard(GameScene game)
+        private void RenderBoard(GamePosition gamePosition, GameScene gameScene)
         {
             for (int row = 0; row < Board.BoardSize; row++) {
                 for (int col = 0; col < Board.BoardSize; col++) {
                     var pos = new Position(row, col);
-                    RenderCell(game, pos);
+                    RenderCell(gamePosition, gameScene, pos);
                 }
             }
         }
 
-        private void RenderCell(GameScene game, Position pos)
+        private void RenderCell(GamePosition gamePosition, GameScene gameScene, Position pos)
         {
-            var square = game.Board.GetSquare(pos);
+            var square = gamePosition.Board.GetSquare(pos);
 
-            bool isCursor = game.Cursor == pos;
-            bool isSelected = game.SelectedPosition == pos;
-            bool isHighlighted = game.HighlightedPositions.Contains(pos);
+            bool isCursor = gameScene.Cursor == pos;
+            bool isSelected = gameScene.SelectedPosition == pos;
+            bool isHighlighted = gameScene.HighlightedPositions.Contains(pos);
 
             ConsoleColor bg = GetBackgroundColor(pos, isSelected, isHighlighted);
             ConsoleColor fg = GetPieceColor(square) ?? ConsoleColor.Yellow;
@@ -193,7 +193,7 @@ namespace Chess.UI.CLI
             }
         }
 
-        private void RenderMoveHistory(List<Move> history)
+        private void RenderMoveHistory(IReadOnlyList<Move> history)
         {
             Console.SetCursorPosition(40, 5);
             Console.WriteLine("Move history: ");
@@ -202,12 +202,13 @@ namespace Chess.UI.CLI
                 Console.Write($"#{i + 1}.{NotationMapper.PositionToString(history[i].From)} - {NotationMapper.PositionToString(history[i].To)}");
 
                 if (history[i] is NormalMove nm) {
-                    Console.WriteLine(nm.CapturedPiece == null ? " " : $" (captured: {nm.CapturedPiece}) ");
+                    Console.WriteLine(nm.CapturedPiece != null ? CLIBoardRenderer.GetSymbol(nm.CapturedPiece) : ' ');
                 }
                 else if (history[i] is EnPassantMove ep) {
-                    Console.WriteLine( $" (captured: {ep.CapturedPiece}) ");
+                    Console.WriteLine($"{CLIBoardRenderer.GetSymbol(ep.CapturedPiece)}");
                 }
             }
         }
+
     }
 }

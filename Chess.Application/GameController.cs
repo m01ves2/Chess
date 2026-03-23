@@ -1,4 +1,5 @@
 ﻿using Chess.Domain;
+using Chess.Domain.Moves;
 using Chess.Engine;
 
 namespace Chess.Application
@@ -6,20 +7,22 @@ namespace Chess.Application
     public class GameController
     {
         private readonly GameScene _gameScene;
-        private GamePosition _gamePosition;
         private readonly GameEngine _gameEngine;
-        private bool _isGameOver = false;
-        public GameScene CurrentGameState => _gameScene;
+        private GamePosition _gamePosition;
 
+        public GamePosition Position => _gamePosition;
+        public GameScene Scene => _gameScene;
+
+        private List<Move> MoveHistory { get; set; } = new List<Move>();
         private Stack<GameSnapshot> _SnapshotHistory = new Stack<GameSnapshot>();
+
+        private bool _isGameOver = false;
 
         public GameController()
         {
             _gameScene = new GameScene();
             _gamePosition = new GamePosition(new Board(), new GameState(), PieceColor.White);
             _gameEngine = new GameEngine();
-
-            UpdateGameScene();
 
             // добавляем стартовый snapshot в стек
             _SnapshotHistory.Push(CreateSnapshot());
@@ -46,13 +49,13 @@ namespace Chess.Application
                 case PlayerActionType.Select:
                     Select(_gameScene.Cursor);
                     break;
-
-                case PlayerActionType.NewGame:
-                    // TODO: сброс игры
-                    break;
+                
 
                 case PlayerActionType.Undo:
                     UndoMove();
+                    break;
+                case PlayerActionType.NewGame:
+                    // TODO: сброс игры
                     break;
                 case PlayerActionType.Quit:
                     _isGameOver = true;
@@ -65,28 +68,56 @@ namespace Chess.Application
 
         private void Select(Position position)
         {
-            var selectedSquare = _gamePosition.Board.GetSquare(position);
             // Сброс подсветки, если новая клетка выбрана
+            var selectedSquare = _gamePosition.Board.GetSquare(position);
             _gameScene.HighlightedPositions.Clear();
 
-
-            if (_gameScene.SelectedPosition == position) { //сняли выделение с выбраной клетки
-                _gameScene.SelectedPosition = null;
+            if (_gameScene.SelectedPosition == position) {
+                _gameScene.ClearSelection();
                 return;
             }
-            
-            if (selectedSquare.Piece?.Color == _gamePosition.CurrentPlayer) {//выделили клетку
-                _gameScene.SelectedPosition = position;
-                var moves = _gameEngine.GetLegalMoves(_gamePosition, position).ToList();
-                moves.ForEach(m => _gameScene.HighlightedPositions.Add(m.To));
+
+            if (selectedSquare.Piece?.Color == _gamePosition.CurrentPlayer) {
+                var result = SelectPiece(position);
+                _gameScene.SetSelection(result.SelectedPosition!.Value);
+                _gameScene.SetHighlights(result.AvailableMoves);
                 return;
             }
 
             if (_gameScene.SelectedPosition != null) {
                 TryMakeMove(_gameScene.SelectedPosition.Value, position);
-                _gameScene.SelectedPosition = null;
+                _gameScene.ClearSelection();
             }
         }
+
+        //private bool IsSameCell(Position position)
+        //{
+        //    return _gameScene.SelectedPosition == position;
+        //}
+        //private void DeselectCell()
+        //{
+        //    _gameScene.SelectedPosition = null;
+        //}
+
+        //private bool IsOwnPiece(Position position)
+        //{
+        //    var selectedSquare = _gamePosition.Board.GetSquare(position);
+        //    return selectedSquare.Piece?.Color == _gamePosition.CurrentPlayer;
+        //}
+
+        //private void SelectPiece(Position position)
+        //{
+        //    _gameScene.SelectedPosition = position;
+        //    var moves = _gameEngine.GetLegalMoves(_gamePosition, position).ToList();
+        //    moves.ForEach(m => _gameScene.HighlightedPositions.Add(m.To));
+        //    return;
+        //}
+        private SelectionResult SelectPiece(Position position)
+        {
+            var moves = _gameEngine.GetLegalMoves(_gamePosition, position).Select(m => m.To).ToList();
+            return new SelectionResult(position, moves);
+        }
+
 
         public void TryMakeMove(Position from, Position to)
         {
@@ -116,31 +147,30 @@ namespace Chess.Application
 
         public void DoMove(Move move)
         {
+            //if (move is PromotionMove pm && pm.IsChoicePending) {
+            //    // вызвать UI, чтобы игрок выбрал фигуру
+            //    var chosen = _gameScene.AskPromotionChoice(pm.Piece.Color, pm.To); // метод возвращает Type
+            //    pm.PromotedPieceType = chosen;
+            //    pm.IsChoicePending = false;
+            //}
+
             _SnapshotHistory.Push(CreateSnapshot()); // snapshot ДО хода
             _gameEngine.MakeMove(_gamePosition, move);      // применяем ход один раз
-            _gamePosition.MoveHistory.Add(move);
+            MoveHistory.Add(move);
             SwitchPlayer();
-            UpdateCheckStatus();
+            UpdateGameScene();
         }
 
         public void UndoMove()
         {
-            _gameScene.SelectedPosition = null;
+            _gameScene.ClearSelection();
             _gameScene.HighlightedPositions.Clear();
-            if (_SnapshotHistory.Count > 0) {
+            if (_SnapshotHistory.Count > 1 && MoveHistory.Count > 0) {
                 var snapshot = _SnapshotHistory.Pop();
-                
-                if (_gamePosition.MoveHistory.Count > 0) {
-                    _gamePosition.MoveHistory.Remove(_gamePosition.MoveHistory.Last());
-                }
+                MoveHistory.Remove(MoveHistory.Last());
 
-                //_gamePosition.Board = snapshot.Board;
-                //_gameEngine.RestoreState(snapshot.State);
-                //_gamePosition.CurrentPlayer = snapshot.CurrentPlayer;
-                //_gamePosition.Restore(snapshot);
                 RestoreSnapshot(snapshot);
                 UpdateGameScene();
-                //_gameEngine.UpdateBoard(_gameScene.Board);
             }
         }
 
@@ -168,12 +198,6 @@ namespace Chess.Application
                 _gameScene.Cursor = newPosition;
         }
 
-        private void UpdateCheckStatus()
-        {
-            _gameScene.WhiteKingInCheck = _gameEngine.IsKingInCheck(_gamePosition, PieceColor.White);
-            _gameScene.BlackKingInCheck = _gameEngine.IsKingInCheck(_gamePosition, PieceColor.Black);
-        }
-
         public bool IsGameOver()
         {
             return _isGameOver;
@@ -181,9 +205,7 @@ namespace Chess.Application
 
         public void UpdateGameScene()
         {
-            _gameScene.Board = _gamePosition.Board;
-            _gameScene.MoveHistory = _gamePosition.MoveHistory;
-
+            _gameScene.UpdateMoveHistory(MoveHistory);
             _gameScene.WhiteKingInCheck = _gameEngine.IsKingInCheck(_gamePosition, PieceColor.White);
             _gameScene.BlackKingInCheck = _gameEngine.IsKingInCheck(_gamePosition, PieceColor.Black);
         }

@@ -4,8 +4,8 @@ namespace Chess.Application
 {
     public class GameScene
     {
-        public Board Board { get; set; }
-        public PieceColor CurrentPlayer { get; set; }
+        //public Board Board { get; set; }
+        //public PieceColor CurrentPlayer { get; set; }
         //public Player PlayerWhite { get; set; }
         //public Player PlayerBlack { get; set; }
 
@@ -16,9 +16,12 @@ namespace Chess.Application
         // Добавляем состояние сцены для UI
         // UI / игровое состояние
         public Position Cursor { get; set; } = new Position(0, 0); // позиция курсора
-        public Position? SelectedPosition { get; set; } // выбранная клетка
+        public Position? SelectedPosition { get; private set; } // выбранная клетка
         public List<Position> HighlightedPositions { get; } = new List<Position>(); // возможные ходы для фигуры на выбранной клетке
-        public List<Move> MoveHistory { get; set; }
+        
+        private List<Move> _moveHistory = new();
+        public IReadOnlyList<Move> MoveHistory => _moveHistory;
+
 
         public GameScene() 
         {
@@ -29,10 +32,33 @@ namespace Chess.Application
             Cursor = new Position(5, 4);
         }
 
-        public void UpdateFrom(GamePosition position)
+        public void UpdateMoveHistory(IEnumerable<Move> moves)
         {
-            Board = position.Board;
-            MoveHistory = position.MoveHistory;
+            _moveHistory.Clear();
+            _moveHistory.AddRange(moves);
+        }
+
+        private bool HasSelection()
+        {
+            return SelectedPosition != null;
+        }
+
+        public void SetSelection(Position pos)
+        {
+            SelectedPosition = pos;
+        }
+        public void ClearSelection()
+        {
+            SelectedPosition = null;
+        }
+        public void SetHighlights(IEnumerable<Position> positions)
+        {
+            HighlightedPositions.Clear();
+            HighlightedPositions.AddRange(positions);
+        }
+        public void ClearHighlights()
+        {
+            HighlightedPositions.Clear();
         }
     }
 }

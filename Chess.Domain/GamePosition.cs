@@ -7,8 +7,6 @@
 
         public PieceColor CurrentPlayer { get; private set; }
 
-        public List<Move> MoveHistory { get; set; } = new List<Move>();
-
         public GamePosition(Board board, GameState state, PieceColor currentPlayer)
         {
             Board = board;

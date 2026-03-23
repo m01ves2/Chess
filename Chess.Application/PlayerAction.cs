@@ -10,8 +10,9 @@ namespace Chess.Application
         MoveLeft,
         MoveRight,
         Select,       // игрок выбирает клетку с фигурой или клетку назначения
-        Quit,         // выход
         Undo,         // отмена хода - через Esc либо клик по уже выбранной клетке
+        Promotion,
+        Quit,         // выход
         NewGame       // новая игра
     }
 

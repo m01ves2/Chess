@@ -18,7 +18,7 @@ namespace Chess.Application
         public void Run()
         {
             while (!_controller.IsGameOver()) {
-                _renderer.Render(_controller.CurrentGameState);
+                _renderer.Render(_controller.Position, _controller.Scene);
                 var action = _input.ReadAction();
                 _controller.ProcessAction(action);
             }

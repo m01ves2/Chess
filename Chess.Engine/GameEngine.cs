@@ -1,4 +1,4 @@
-﻿using Chess.Domain;
+﻿    using Chess.Domain;
 using Chess.Domain.Moves;
 using Chess.Domain.Pieces;
 
@@ -69,8 +69,15 @@ namespace Chess.Engine
             if (!gamePosition.Board.IsInsideBoard(oneStep))
                 yield break;
 
+
             if (gamePosition.Board.GetSquare(oneStep).IsEmpty()) {
-                yield return new NormalMove(pos, oneStep, pawn);
+                if ((oneStep.Row == 0 && pawn.Color == PieceColor.White) ||
+                (oneStep.Row == 7 && pawn.Color == PieceColor.Black)) {
+                    yield return new PromotionMove(pos, oneStep, pawn, true);
+                }
+                else {    
+                    yield return new NormalMove(pos, oneStep, pawn);
+                }
             }
         }
         private IEnumerable<Move> AddPawnDoubleMove(GamePosition gamePosition, Position pos, Piece pawn, MoveOffset offset)
@@ -194,8 +201,6 @@ namespace Chess.Engine
                     break;
                     // другие спец. ходы
             }
-            //foreach (var move in AddKingCastlingMove(pos, piece))
-            //    yield return move;
         }
         private IEnumerable<Move> AddCastlingMove(GamePosition gamePosition, Position pos, Piece king, MoveOffset offset)
         {

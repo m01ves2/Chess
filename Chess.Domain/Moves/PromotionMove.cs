@@ -1,11 +1,14 @@
 ﻿namespace Chess.Domain.Moves
 {
-    internal class PromotionMove : Move
+    public class PromotionMove : Move
     {
         public Piece PromotionPiece { get; }
-        public PromotionMove(Position from, Position to, Piece piece, Piece promotionPiece) : base(from, to, piece)
+
+        public bool IsChoicePending { get; set; } = true; // пока игрок не выбрал фигуру
+        public Type? PromotedPieceType { get; set; } // Queen, Rook, Bishop, Knight     // результат выбора игрока
+
+        public PromotionMove(Position from, Position to, Piece piece, bool IsChoicePending) : base(from, to, piece)
         {
-            PromotionPiece = promotionPiece;
         }
 
         public override void Apply(GamePosition gamePosition)
