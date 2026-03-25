@@ -27,46 +27,47 @@ namespace Chess.Application
             // добавляем стартовый snapshot в стек
             _SnapshotHistory.Push(CreateSnapshot());
         }
+
         // Обработка действия игрока
-        public void ProcessAction(PlayerAction action)
-        {
-            if (action == null) return;
+        //public void ProcessAction(PlayerAction action)
+        //{
+        //    if (action == null) return;
 
-            switch (action.Type) {
-                case PlayerActionType.MoveUp:
-                    MoveCursor(-1, 0);
-                    break;
-                case PlayerActionType.MoveDown:
-                    MoveCursor(1, 0);
-                    break;
-                case PlayerActionType.MoveLeft:
-                    MoveCursor(0, -1);
-                    break;
-                case PlayerActionType.MoveRight:
-                    MoveCursor(0, 1);
-                    break;
+        //    switch (action.Type) {
+        //        case PlayerActionType.MoveUp:
+        //            MoveCursor(-1, 0);
+        //            break;
+        //        case PlayerActionType.MoveDown:
+        //            MoveCursor(1, 0);
+        //            break;
+        //        case PlayerActionType.MoveLeft:
+        //            MoveCursor(0, -1);
+        //            break;
+        //        case PlayerActionType.MoveRight:
+        //            MoveCursor(0, 1);
+        //            break;
 
-                case PlayerActionType.Select:
-                    Select(_gameScene.Cursor);
-                    break;
+        //        case PlayerActionType.Select:
+        //            Select(_gameScene.Cursor);
+        //            break;
                 
 
-                case PlayerActionType.Undo:
-                    UndoMove();
-                    break;
-                case PlayerActionType.NewGame:
-                    // TODO: сброс игры
-                    break;
-                case PlayerActionType.Quit:
-                    _isGameOver = true;
-                    break; // завершаем игру
+        //        case PlayerActionType.Undo:
+        //            UndoMove();
+        //            break;
+        //        case PlayerActionType.NewGame:
+        //            // TODO: сброс игры
+        //            break;
+        //        case PlayerActionType.Quit:
+        //            _isGameOver = true;
+        //            break; // завершаем игру
 
-                default:
-                    break;
-            }
-        }
+        //        default:
+        //            break;
+        //    }
+        //}
 
-        private void Select(Position position)
+        public void Select(Position position)
         {
             // Сброс подсветки, если новая клетка выбрана
             var selectedSquare = _gamePosition.Board.GetSquare(position);
@@ -191,7 +192,7 @@ namespace Chess.Application
             _gamePosition.SwitchTurn();
         }
 
-        private void MoveCursor(int dRow, int dCol)
+        public void MoveCursor(int dRow, int dCol)
         {
             var newPosition = new Position(_gameScene.Cursor.Row + dRow, _gameScene.Cursor.Col + dCol);
             if (_gamePosition.Board.IsInsideBoard(newPosition))

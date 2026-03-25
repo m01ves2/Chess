@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36811.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.UI.CLI", "Chess.UI.CLI\Chess.UI.CLI.csproj", "{C9C3DD4A-533F-417C-9D82-49133CFE4861}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.Domain", "Chess.Domain\Chess.Domain.csproj", "{C922BAE3-3E7F-4114-A8FC-9CDD610DAFC4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.Engine", "Chess.Engine\Chess.Engine.csproj", "{0E5AF81D-EF88-40F4-8FCE-43CCBA4AEE7C}"
@@ -13,16 +11,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.Application", "Chess.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.CompositionRoot", "Chess.CompositionRoot\Chess.CompositionRoot.csproj", "{546621BF-E1D0-4D36-8DF6-7065D7684100}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.UI.CLI", "Chess.UI.CLI\Chess.UI.CLI.csproj", "{0758E09F-4C95-4220-90F6-9DFF679145DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C9C3DD4A-533F-417C-9D82-49133CFE4861}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C9C3DD4A-533F-417C-9D82-49133CFE4861}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C9C3DD4A-533F-417C-9D82-49133CFE4861}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C9C3DD4A-533F-417C-9D82-49133CFE4861}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C922BAE3-3E7F-4114-A8FC-9CDD610DAFC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C922BAE3-3E7F-4114-A8FC-9CDD610DAFC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C922BAE3-3E7F-4114-A8FC-9CDD610DAFC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,6 +35,10 @@ Global
 		{546621BF-E1D0-4D36-8DF6-7065D7684100}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{546621BF-E1D0-4D36-8DF6-7065D7684100}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{546621BF-E1D0-4D36-8DF6-7065D7684100}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0758E09F-4C95-4220-90F6-9DFF679145DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0758E09F-4C95-4220-90F6-9DFF679145DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0758E09F-4C95-4220-90F6-9DFF679145DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0758E09F-4C95-4220-90F6-9DFF679145DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

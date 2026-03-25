@@ -1,9 +1,4 @@
-﻿using Chess.Application;
-using Chess.Application.Interfaces;
-using Chess.Domain;
-using System.Security.Cryptography.X509Certificates;
-
-namespace Chess.UI.CLI
+﻿namespace Chess.UI.CLI
 {
     public class CLIInputHandler : IInputHandler
     {
@@ -21,8 +16,8 @@ namespace Chess.UI.CLI
                     return new PlayerAction(PlayerActionType.MoveUp);
                 case ConsoleKey.DownArrow:
                     return new PlayerAction(PlayerActionType.MoveDown);
-                case ConsoleKey.Q:
-                    return new PlayerAction(PlayerActionType.Quit);
+                case ConsoleKey.Escape:
+                    return new PlayerAction(PlayerActionType.Escape);
                 case ConsoleKey.N:
                     return new PlayerAction(PlayerActionType.NewGame);
                 case ConsoleKey.U:

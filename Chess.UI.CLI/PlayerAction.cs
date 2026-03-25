@@ -1,6 +1,4 @@
-﻿using Chess.Domain;
-
-namespace Chess.Application
+﻿namespace Chess.UI.CLI
 {
     public enum PlayerActionType
     {
@@ -12,8 +10,8 @@ namespace Chess.Application
         Select,       // игрок выбирает клетку с фигурой или клетку назначения
         Undo,         // отмена хода - через Esc либо клик по уже выбранной клетке
         Promotion,
-        Quit,         // выход
-        NewGame       // новая игра
+        NewGame,       // новая игра
+        Escape,         // выход в меню
     }
 
     public record PlayerAction(PlayerActionType Type);
