@@ -16,7 +16,7 @@ namespace Chess.UI.CLI.Screens
         private int ConsoleWidth = Console.WindowWidth;
         private int ConsoleHeight = Console.WindowHeight;
 
-        private bool _isTooSmall = false;
+        //private bool _isTooSmall = false;
 
         public GameScreen(ScreenManager manager) : base(manager)
         {
@@ -49,8 +49,14 @@ namespace Chess.UI.CLI.Screens
             //_boardPanel.SetData(boardVM);
             _boardPanel.Render();
 
+            var historyVM = _gameController.GetHistoryView();
+            _historyPanel.SetData(historyVM);
             _historyPanel.Render();
+
+            var infoVM = _gameController.GetInfoView();
+            _infoPanel.SetData(infoVM);
             _infoPanel.Render();
+            
             _messagePanel.Render();
         }
 

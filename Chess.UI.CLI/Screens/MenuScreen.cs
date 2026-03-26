@@ -51,18 +51,5 @@ namespace Chess.UI.CLI.Screens
                     break;
             }
         }
-
-        private void PrintSelected(string item)
-        {
-            var defaultColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(item);
-            Console.ForegroundColor = defaultColor;
-        }
-
-        private void PrintNormal(string item)
-        {
-            Console.WriteLine(item);
-        }
     }
 }

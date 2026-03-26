@@ -16,8 +16,8 @@
     public class GameSettings
     {
         //public GameMode Mode { get; set; }
-        public PlayerType WhitePlayer { get; set; }
-        public PlayerType BlackPlayer { get; set; }
+        public PlayerType WhitePlayer { get; set; } = PlayerType.Human;
+        public PlayerType BlackPlayer { get; set; } = PlayerType.Human;
 
         public int AiDifficulty { get; set; } = 1;
     }

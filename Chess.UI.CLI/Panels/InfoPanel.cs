@@ -1,19 +1,24 @@
-﻿using Chess.Application;
-using Chess.Domain;
+﻿using Chess.Application.ViewModels;
 
 namespace Chess.UI.CLI.Panels
 {
-    public class InfoPanel : BasePanel
+    public class InfoPanel : TextPanelBase
     {
+        private InfoViewModel _infoVM;
         public InfoPanel(int x, int y, int width, int height) : base(x, y, width, height)
         {
         }
 
-        public override void BuildBuffer(GamePosition position, GameScene scene)
+        public override void BuildBuffer()
         {
-            for (int row = 0; row < InnerHeight; row++) {
-                _buffer[row] = new string('I', InnerWidth);
-            }
+            ClearLines();
+            foreach(var item in _infoVM.Info)
+                AddLine(item);
+        }
+
+        public void SetData(InfoViewModel infoVM)
+        {
+            _infoVM = infoVM;
         }
     }
 }

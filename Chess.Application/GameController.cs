@@ -1,4 +1,5 @@
-﻿using Chess.Domain;
+﻿using Chess.Application.ViewModels;
+using Chess.Domain;
 using Chess.Domain.Moves;
 using Chess.Engine;
 
@@ -13,8 +14,8 @@ namespace Chess.Application
         public GamePosition Position => _gamePosition;
         public GameScene Scene => _gameScene;
 
-        private List<Move> MoveHistory { get; set; } = new List<Move>();
-        private Stack<GameSnapshot> _SnapshotHistory = new Stack<GameSnapshot>();
+        private List<Move> _moveHistory { get; set; } = new List<Move>();
+        private Stack<GameSnapshot> _snapshotHistory = new Stack<GameSnapshot>();
 
         private bool _isGameOver = false;
 
@@ -25,7 +26,7 @@ namespace Chess.Application
             _gameEngine = new GameEngine();
 
             // добавляем стартовый snapshot в стек
-            _SnapshotHistory.Push(CreateSnapshot());
+            _snapshotHistory.Push(CreateSnapshot());
         }
 
         // Обработка действия игрока
@@ -155,9 +156,9 @@ namespace Chess.Application
             //    pm.IsChoicePending = false;
             //}
 
-            _SnapshotHistory.Push(CreateSnapshot()); // snapshot ДО хода
+            _snapshotHistory.Push(CreateSnapshot()); // snapshot ДО хода
             _gameEngine.MakeMove(_gamePosition, move);      // применяем ход один раз
-            MoveHistory.Add(move);
+            _moveHistory.Add(move);
             SwitchPlayer();
             UpdateGameScene();
         }
@@ -166,9 +167,9 @@ namespace Chess.Application
         {
             _gameScene.ClearSelection();
             _gameScene.HighlightedPositions.Clear();
-            if (_SnapshotHistory.Count > 1 && MoveHistory.Count > 0) {
-                var snapshot = _SnapshotHistory.Pop();
-                MoveHistory.Remove(MoveHistory.Last());
+            if (_snapshotHistory.Count > 1 && _moveHistory.Count > 0) {
+                var snapshot = _snapshotHistory.Pop();
+                _moveHistory.Remove(_moveHistory.Last());
 
                 RestoreSnapshot(snapshot);
                 UpdateGameScene();
@@ -206,9 +207,59 @@ namespace Chess.Application
 
         public void UpdateGameScene()
         {
-            _gameScene.UpdateMoveHistory(MoveHistory);
+            _gameScene.UpdateMoveHistory(_moveHistory);
             _gameScene.WhiteKingInCheck = _gameEngine.IsKingInCheck(_gamePosition, PieceColor.White);
             _gameScene.BlackKingInCheck = _gameEngine.IsKingInCheck(_gamePosition, PieceColor.Black);
+        }
+
+        public BoardViewModel GetBoardView()
+        {
+            //var vm = new BoardViewModel();
+
+            //for (int row = 0; row < 8; row++) {
+            //    for (int col = 0; col < 8; col++) {
+            //        var square = _gamePosition.Board.GetSquare(new Position(row, col));
+
+            //        vm.Cells[row, col] = square.Piece == null ? ' ' : MapPieceToChar(square.Piece);
+            //    }
+            //}
+
+            //vm.Cursor = _gameScene.Cursor;
+            //vm.Highlights = _gameScene.HighlightedPositions.ToList();
+
+            //return vm;
+            throw new NotImplementedException();
+        }
+        public MoveHistoryViewModel GetHistoryView()
+        {
+            var historyViewModel = new MoveHistoryViewModel();
+            for(int  i = 0; i < _moveHistory.Count; i++) {
+                var mh = _moveHistory[i];
+                string mitem = $"#{i + 1}.{NotationMapper.PositionToString(mh.From)} - {NotationMapper.PositionToString(mh.To)}";
+                
+                if (mh is NormalMove nm && nm.CapturedPiece != null) {
+                    mitem += nm.CapturedPiece.ToString();
+                }
+                else if (mh is EnPassantMove em && em.CapturedPiece != null) {
+                    mitem += em.CapturedPiece.ToString();
+                }
+                historyViewModel.MoveHistory.Add(mitem);
+            }
+            return historyViewModel;
+        }
+        public InfoViewModel GetInfoView()
+        {
+            var infoViewModel = new InfoViewModel();
+
+            infoViewModel.Info.Add(_gamePosition.CurrentPlayer.ToString() + " turns.");
+
+            if (_gameScene.WhiteKingInCheck)
+                infoViewModel.Info.Add("White King in Check!");
+
+            if(_gameScene.BlackKingInCheck)
+                infoViewModel.Info.Add("Black King in Check!");
+
+            return infoViewModel;
         }
     }
 }

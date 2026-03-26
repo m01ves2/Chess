@@ -6,13 +6,13 @@ namespace Chess.UI.CLI
     public class ScreenManager
     {
         private BaseScreen _currentScreen;
-        protected GameSettings _settings;
+        public GameSettings GameSettings { get; private set; }
 
         public bool IsExitRequested { get; private set; } = false;
 
         public ScreenManager()
         {
-            _settings = new GameSettings();
+            GameSettings = new GameSettings();
         }
 
         public void SetScreen(BaseScreen screen)
@@ -51,6 +51,27 @@ namespace Chess.UI.CLI
         public void RequestExit()
         {
             IsExitRequested = true;
+        }
+
+        public void TogglePlayerWhiteSetting()
+        {
+            if(GameSettings.WhitePlayer == PlayerType.Human)
+                GameSettings.WhitePlayer = PlayerType.Ai;
+            else
+                GameSettings.WhitePlayer = PlayerType.Human;
+        }
+
+        public void TogglePlayerBlackSetting()
+        {
+            if (GameSettings.BlackPlayer == PlayerType.Human)
+                GameSettings.BlackPlayer = PlayerType.Ai;
+            else
+                GameSettings.BlackPlayer = PlayerType.Human;
+        }
+
+        public void ToggleAiDifficultySetting()
+        {
+            GameSettings.AiDifficulty = GameSettings.AiDifficulty % 3 + 1;
         }
     }
 }
