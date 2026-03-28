@@ -249,15 +249,33 @@ namespace Chess.Application
                 string mitem = $"#{i + 1}.{NotationMapper.PositionToString(mh.From)} - {NotationMapper.PositionToString(mh.To)}";
                 
                 if (mh is NormalMove nm && nm.CapturedPiece != null) {
-                    mitem += nm.CapturedPiece.ToString();
+                    mitem += GetSymbol(nm.CapturedPiece);
                 }
                 else if (mh is EnPassantMove em && em.CapturedPiece != null) {
-                    mitem += em.CapturedPiece.ToString();
+                    mitem += GetSymbol(em.CapturedPiece);
                 }
                 historyViewModel.Moves.Add(mitem);
             }
             return historyViewModel;
         }
+
+        private static char GetSymbol(Piece piece) => piece switch
+        {
+            Rook r when r.Color == PieceColor.White => '\u2656',
+            Rook r => '\u265C',
+            Knight n when n.Color == PieceColor.White => '\u2658',
+            Knight n => '\u265E',
+            Bishop b when b.Color == PieceColor.White => '\u2657',
+            Bishop b => '\u265D',
+            Queen q when q.Color == PieceColor.White => '\u2655',
+            Queen q => '\u265B',
+            King k when k.Color == PieceColor.White => '\u2654',
+            King k => '\u265A',
+            Pawn p when p.Color == PieceColor.White => '\u2659',
+            Pawn p => '\u265F',
+            _ => '?'
+        };
+
         public InfoView GetInfoView()
         {
             var infoView = new InfoView()

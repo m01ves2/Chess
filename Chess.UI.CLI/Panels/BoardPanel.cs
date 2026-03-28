@@ -23,15 +23,7 @@ namespace Chess.UI.CLI.Panels
             RenderFiles();
             BuildBoard(view);
             BuildRanks();
-
-            //вот тут полное заполнение шахматной доски, как надо!
-            //for (int row = 0; row < InnerHeight; row++) {
-            //    for (int col = 0; col < InnerWidth; col++) {
-            //        _buffer[row*cellwidth, col*cellheight].Symbol = view.Cells[row, col].PieceView.
-            //    }
-            //}
         }
-
         private void RenderFiles()
         {
             //Верхняя нумерация файлов(a - h)
@@ -45,7 +37,6 @@ namespace Chess.UI.CLI.Panels
                 d++;
             }
         }
-
         private void BuildRanks()
         {
             //Левый столбец с рангами(1 - 8)
@@ -57,7 +48,6 @@ namespace Chess.UI.CLI.Panels
                 _buffer[r * _cellHeight + YOffset, XOffset].bg = ConsoleColor.Black;
             }
         }
-
         private void BuildBoard(BoardView view)
         {
             for (int row = 0; row < _boardSize; row++) {
@@ -66,7 +56,6 @@ namespace Chess.UI.CLI.Panels
                 }
             }
         }
-
         private void RenderCell(int row, int col, BoardView view)
         {
             var cell = view.Cells[row, col];
@@ -75,7 +64,7 @@ namespace Chess.UI.CLI.Panels
             bool isHighlighted = cell.IsHighlighted;
 
             ConsoleColor bg = GetBackgroundColor(row, col, isSelected, isHighlighted);
-            ConsoleColor fg = GetPieceColor(cell) ?? ConsoleColor.Yellow;
+            ConsoleColor fg = GetPieceColor(cell) ?? ConsoleColor.Red;
 
             var pieceSymbol = GetPieceSymbol(cell.PieceView );
             
@@ -97,7 +86,7 @@ namespace Chess.UI.CLI.Panels
             else if (cell.PieceView.Color == PieceViewColor.Black)
                 return ConsoleColor.Black;
             else
-                return ConsoleColor.White;
+                return ConsoleColor.Yellow;
         }
         private char GetPieceSymbol(PieceView? pieceView)
         {
@@ -122,7 +111,6 @@ namespace Chess.UI.CLI.Panels
                 _ => '?'
             };
         }
-
         private void BuildCell(int row, int col, char pieceSymbol, ConsoleColor bg, ConsoleColor fg, bool isCursor)
         {
             int XOffset = 3;
@@ -141,7 +129,6 @@ namespace Chess.UI.CLI.Panels
             _buffer[y, x    ].fg = fg;
             _buffer[y, x + 1].fg = fg;
             _buffer[y, x + 2].fg = fg;
-
             //middle
             _buffer[y + 1, x    ].Symbol = isCursor ? '│' : ' ';
             _buffer[y + 1, x + 1].Symbol = pieceSymbol;

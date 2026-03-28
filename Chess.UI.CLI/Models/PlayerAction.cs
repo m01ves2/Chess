@@ -12,6 +12,8 @@
         Promotion,
         NewGame,       // новая игра
         Escape,         // выход в меню
+        PageUp,       //прокрутка какой то текстовой информации
+        PageDown,
     }
 
     public record PlayerAction(PlayerActionType Type);

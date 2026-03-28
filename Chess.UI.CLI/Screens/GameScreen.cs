@@ -34,6 +34,7 @@ namespace Chess.UI.CLI.Screens
             _messagePanel = new MessagePanel(0, boardPanelHeight, leftPanelWidth, Console.WindowHeight - boardPanelHeight);
             _infoPanel = new InfoPanel(leftPanelWidth, 0, rightPanelWidth, infoPanelHeight);
             _historyPanel = new HistoryPanel(leftPanelWidth, infoPanelHeight, rightPanelWidth, Console.WindowHeight - infoPanelHeight);
+            //_historyPanel = new HistoryPanel(leftPanelWidth, infoPanelHeight, rightPanelWidth, 7);
         }
 
         public override void Render()
@@ -85,6 +86,12 @@ namespace Chess.UI.CLI.Screens
                     _manager.SetScreen(new GameScreen(_manager));
                     break;
 
+                case PlayerActionType.PageUp:
+                    _historyPanel.PageUp();
+                    break;
+                case PlayerActionType.PageDown:
+                    _historyPanel.PageDown();
+                    break;
                 default:
                     break;
             }

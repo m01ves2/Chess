@@ -8,8 +8,6 @@ namespace Chess.UI.CLI.Panels
     {
         public QuitPanel(int x, int y, int width, int height) : base(x, y, width, height)
         {
-            //AddLine("=== Chess CLI ===");
-            //AddLine("Press any key to quit...");
         }
 
         public override void BuildBuffer(QuitView view)

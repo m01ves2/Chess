@@ -6,13 +6,6 @@ namespace Chess.UI.CLI.Panels
 {
     public class SettingsPanel : TextPanelBase<SettingsView>
     {
-        //private int selectedIndex = 0;
-        //private List<string> _lines => new List<string>() {
-        //    "1. Player White: " + _gameSettings.WhitePlayer,
-        //    "2. Player Black: " + _gameSettings.BlackPlayer,
-        //    "3. Ai level: " + _gameSettings.AiDifficulty
-        //};
-        
         public SettingsPanel(int x, int y, int width, int height) : base(x, y, width, height)
         {
         }
