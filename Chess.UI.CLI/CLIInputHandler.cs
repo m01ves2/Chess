@@ -1,4 +1,7 @@
-﻿namespace Chess.UI.CLI
+﻿using Chess.UI.CLI.Interfaces;
+using Chess.UI.CLI.Models;
+
+namespace Chess.UI.CLI
 {
     public class CLIInputHandler : IInputHandler
     {

@@ -1,4 +1,5 @@
-﻿using Chess.Application;
+﻿using Chess.Application.Models;
+using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Screens;
 
 namespace Chess.UI.CLI
@@ -51,27 +52,6 @@ namespace Chess.UI.CLI
         public void RequestExit()
         {
             IsExitRequested = true;
-        }
-
-        public void TogglePlayerWhiteSetting()
-        {
-            if(GameSettings.WhitePlayer == PlayerType.Human)
-                GameSettings.WhitePlayer = PlayerType.Ai;
-            else
-                GameSettings.WhitePlayer = PlayerType.Human;
-        }
-
-        public void TogglePlayerBlackSetting()
-        {
-            if (GameSettings.BlackPlayer == PlayerType.Human)
-                GameSettings.BlackPlayer = PlayerType.Ai;
-            else
-                GameSettings.BlackPlayer = PlayerType.Human;
-        }
-
-        public void ToggleAiDifficultySetting()
-        {
-            GameSettings.AiDifficulty = GameSettings.AiDifficulty % 3 + 1;
         }
     }
 }

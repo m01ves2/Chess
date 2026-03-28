@@ -1,4 +1,5 @@
 ﻿using Chess.Application.Interfaces;
+using Chess.UI.CLI.Interfaces;
 using System;
 
 namespace Chess.UI.CLI

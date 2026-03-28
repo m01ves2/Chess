@@ -1,12 +1,13 @@
 ﻿using Chess.Application;
 using Chess.Domain;
+using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels;
 
 namespace Chess.UI.CLI.Screens
 {
     public class GameScreen : BaseScreen
     {
-        private GameController _gameController;
+        private readonly GameController _gameController;
 
         private BoardPanel _boardPanel;
         private HistoryPanel _historyPanel;
@@ -15,8 +16,6 @@ namespace Chess.UI.CLI.Screens
 
         private int ConsoleWidth = Console.WindowWidth;
         private int ConsoleHeight = Console.WindowHeight;
-
-        //private bool _isTooSmall = false;
 
         public GameScreen(ScreenManager manager) : base(manager)
         {
@@ -44,20 +43,17 @@ namespace Chess.UI.CLI.Screens
             //bool rotate = _mode == GameMode.HumanVsHuman
             //        && _controller.CurrentPlayer == PieceColor.Black;
 
-            //var boardVM = _controller.GetBoardView(rotate);
+            var boardView = _gameController.GetBoardView();
+            _boardPanel.Render(boardView);
 
-            //_boardPanel.SetData(boardVM);
-            _boardPanel.Render();
+            var historyView = _gameController.GetHistoryView();
+            _historyPanel.Render(historyView);
 
-            var historyVM = _gameController.GetHistoryView();
-            _historyPanel.SetData(historyVM);
-            _historyPanel.Render();
+            var infoView = _gameController.GetInfoView();
+            _infoPanel.Render(infoView);
 
-            var infoVM = _gameController.GetInfoView();
-            _infoPanel.SetData(infoVM);
-            _infoPanel.Render();
-            
-            _messagePanel.Render();
+            var messageView = _gameController.GetMessageView();
+            _messagePanel.Render(messageView);
         }
 
         public override void HandleInput(PlayerAction action)
@@ -128,30 +124,5 @@ namespace Chess.UI.CLI.Screens
             if (Console.WindowHeight != ConsoleHeight || Console.WindowWidth != ConsoleWidth)
                 Init();
         }
-
-        //private void ShowResizeWarning()
-        //{
-        //    Console.Clear();
-        //    Console.SetCursorPosition(0, 0);
-        //    Console.WriteLine("Window too small!");
-        //    Console.WriteLine($"Minimum: {MinWidth}x{MinHeight}");
-        //    Console.WriteLine($"Current: {Console.WindowWidth}x{Console.WindowHeight}");
-        //}
-
-        //private void RebuildLayout()
-        //{
-        //    // ВАЖНО: сначала очистка
-        //    Console.Clear();
-
-        //    int leftPanelWidth = 30;
-        //    int rightPanelWidth = ConsoleWidth - leftPanelWidth;
-        //    int boardPanelHeight = 30;
-        //    int infoPanelHeight = 4;
-
-        //    _boardPanel = new BoardPanel(0, 0, leftPanelWidth, boardPanelHeight);
-        //    _messagePanel = new MessagePanel(0, boardPanelHeight, leftPanelWidth, ConsoleHeight - boardPanelHeight);
-        //    _infoPanel = new InfoPanel(leftPanelWidth, 0, rightPanelWidth, infoPanelHeight);
-        //    _historyPanel = new HistoryPanel(leftPanelWidth, infoPanelHeight, rightPanelWidth, ConsoleHeight - infoPanelHeight);
-        //}
     }
 }

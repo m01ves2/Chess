@@ -1,6 +1,5 @@
-﻿using Chess.Application;
-using Chess.Application.Interfaces;
-using Chess.UI.CLI;
+﻿using Chess.UI.CLI;
+using Chess.UI.CLI.Interfaces;
 using Chess.UI.CLI.Screens;
 
 namespace Chess.CompositionRoot

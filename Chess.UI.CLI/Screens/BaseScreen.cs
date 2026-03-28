@@ -1,4 +1,5 @@
 ﻿using Chess.Application;
+using Chess.UI.CLI.Models;
 
 namespace Chess.UI.CLI.Screens
 {
@@ -7,27 +8,15 @@ namespace Chess.UI.CLI.Screens
         //protected const int MinWidth = 80;
         //protected const int MinHeight = 40;
         
-        protected ScreenManager _manager;
+        protected readonly ScreenManager _manager;
 
         public BaseScreen(ScreenManager manager)
         {
             _manager = manager;
+            Console.Clear();
         }
 
         public abstract void Render();
         public abstract void HandleInput(PlayerAction action);
-
-        protected void PrintSelected(string item)
-        {
-            var defaultColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(item);
-            Console.ForegroundColor = defaultColor;
-        }
-
-        protected void PrintNormal(string item)
-        {
-            Console.WriteLine(item);
-        }
     }
 }

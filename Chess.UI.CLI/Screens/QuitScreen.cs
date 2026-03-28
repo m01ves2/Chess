@@ -1,11 +1,21 @@
-﻿using Chess.Application;
+﻿using Chess.UI.CLI.Models;
+using Chess.UI.CLI.Panels;
+using Chess.UI.CLI.Views;
 
 namespace Chess.UI.CLI.Screens
 {
     public class QuitScreen : BaseScreen
     {
+        private QuitPanel _quitPanel;
+        private QuitView _quitView;
         public QuitScreen(ScreenManager manager) : base(manager)
         {
+            _quitPanel = new QuitPanel(0, 0, Console.WindowWidth, Console.WindowHeight);
+            _quitView = new QuitView() { QuitItems = new List<string>() { "Press any key to continue..." } };
+        }
+        public override void Render()
+        {
+            _quitPanel.Render(_quitView);
         }
 
         public override void HandleInput(PlayerAction action)
@@ -13,14 +23,5 @@ namespace Chess.UI.CLI.Screens
             _manager.RequestExit();
         }
 
-        public override void Render()
-        {
-            Console.Clear();
-            Console.WriteLine("=== Chess CLI ===");
-            Console.WriteLine("Press any key to quit...");
-
-            //TODO show game statistics
-
-        }
     }
 }

@@ -1,24 +1,26 @@
 ﻿using Chess.Application.ViewModels;
+using Chess.UI.CLI.Panels.BasePanels;
+using Chess.UI.CLI.Panels.BasePanels.Rendering;
 
 namespace Chess.UI.CLI.Panels
 {
-    public class InfoPanel : TextPanelBase
+    public class InfoPanel : TextPanelBase<InfoView>
     {
-        private InfoViewModel _infoVM;
         public InfoPanel(int x, int y, int width, int height) : base(x, y, width, height)
         {
         }
 
-        public override void BuildBuffer()
+        public override void BuildBuffer(InfoView view)
         {
             ClearLines();
-            foreach(var item in _infoVM.Info)
-                AddLine(item);
-        }
 
-        public void SetData(InfoViewModel infoVM)
-        {
-            _infoVM = infoVM;
+            AddLine(new LineRender() { Text = $"{view.CurrentPlayer} turn", Style = LineStyle.None });
+
+            if(view.IsCheck)
+                AddLine(new LineRender() { Text = $"King in Check!", Style = LineStyle.Selected });
+
+            if(view.IsCheckmate)
+                AddLine(new LineRender() { Text = $"King in Checkmate!", Style = LineStyle.Selected });
         }
     }
 }

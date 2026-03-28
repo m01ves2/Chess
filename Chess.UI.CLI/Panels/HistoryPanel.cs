@@ -1,28 +1,23 @@
 ﻿using Chess.Application;
 using Chess.Application.ViewModels;
 using Chess.Domain;
+using Chess.UI.CLI.Panels.BasePanels;
+using Chess.UI.CLI.Panels.BasePanels.Rendering;
 
 namespace Chess.UI.CLI.Panels
 {
-    public class HistoryPanel : TextPanelBase
+    public class HistoryPanel : TextPanelBase<MoveHistoryView>
     {
-        private MoveHistoryViewModel _historyVM;
         public HistoryPanel(int x, int y, int width, int height) : base(x, y, width, height)
         {
-            _historyVM = new MoveHistoryViewModel();
         }
 
-        public override void BuildBuffer()
+        public override void BuildBuffer(MoveHistoryView view)
         {
             ClearLines();
-            for (int i = 0; i < _historyVM.MoveHistory.Count; i++) {
-                AddLine(_historyVM.MoveHistory[i]);
+            for (int i = 0; i < view.Moves.Count; i++) {
+                AddLine(new LineRender() { Text = view.Moves[i], Style = LineStyle.None } );
             }
-        }
-
-        public void SetData(MoveHistoryViewModel historyVM)
-        {
-            _historyVM = historyVM;
         }
 
         //public override void Render()

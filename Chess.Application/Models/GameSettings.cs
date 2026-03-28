@@ -1,5 +1,5 @@
-﻿namespace Chess.UI.CLI
-{
+﻿namespace Chess.Application.Models
+{ 
     //public enum GameMode
     //{
     //    HumanVsHuman,

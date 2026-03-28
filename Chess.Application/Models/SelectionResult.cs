@@ -1,6 +1,6 @@
 ﻿using Chess.Domain;
 
-namespace Chess.Application
+namespace Chess.Application.Models
 {
     public class SelectionResult
     {

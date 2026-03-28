@@ -1,26 +1,25 @@
-﻿using Chess.Application;
-using System.Runtime;
+﻿using Chess.Application.Models;
+using Chess.UI.CLI.Models;
+using Chess.UI.CLI.Panels;
+using Chess.UI.CLI.Views;
 
 namespace Chess.UI.CLI.Screens
 {
     // Главное меню
     public class MenuScreen : BaseScreen
-    {
-        private int selectedIndex = 0;
-        private List<string> items = new List<string>() { "1. New Game", "2. Settings", "3. Quit" };
+    {      
+        private MenuPanel _menuPanel;
+        private MenuView _menuView;
+        private readonly GameSettings _gameSettings;
 
-        public MenuScreen(ScreenManager manager) : base(manager) { }
+        public MenuScreen(ScreenManager manager) : base(manager) {
+            _menuPanel = new MenuPanel(0, 0, Console.WindowWidth, Console.WindowHeight);
+            _menuView = new MenuView() { MenuItems = new List<string>() { "1. New Game", "2. Settings", "3. Quit" }, selectedIndex = 0 };
+        }
 
         public override void Render()
         {
-            Console.Clear();
-            Console.WriteLine("=== Chess CLI ===");
-            for (int i = 0; i < items.Count; i++) {
-                if (i == selectedIndex)
-                    PrintSelected(items[i]);
-                else
-                    PrintNormal(items[i]);
-            }
+            _menuPanel.Render(_menuView);
         }
 
         public override void HandleInput(PlayerAction action)
@@ -29,25 +28,47 @@ namespace Chess.UI.CLI.Screens
 
             switch (action.Type) {
                 case PlayerActionType.MoveDown:
-                    selectedIndex++;
-                    if (selectedIndex > items.Count - 1) selectedIndex = items.Count - 1;
+                    MoveDown();
                     break;
                 case PlayerActionType.MoveUp:
-                    selectedIndex--;
-                    if (selectedIndex < 0) selectedIndex = 0;
+                    MoveUp();
                     break;
                 case PlayerActionType.Select:
-                    if (selectedIndex == 0) {
-                        _manager.SetScreen(new GameScreen(_manager));
-                    }
-                    else if (selectedIndex == 1)
-                        _manager.SetScreen(new GameSettingsScreen(_manager));
-                    else if (selectedIndex == 2) {
-                        _manager.SetScreen(new QuitScreen(_manager));
-                    }
+                    HandleSelection();
                     break;
                 
                 default:
+                    break;
+            }
+        }
+
+        public void MoveDown()
+        {
+            _menuView.selectedIndex++;
+            if (_menuView.selectedIndex > _menuView.MenuItems.Count - 1)
+                _menuView.selectedIndex = _menuView.MenuItems.Count - 1;
+        }
+
+        public void MoveUp()
+        {
+            _menuView.selectedIndex--;
+            if (_menuView.selectedIndex < 0)
+                _menuView.selectedIndex = 0;
+        }
+
+        private void HandleSelection()
+        {
+            switch (_menuView.selectedIndex) {
+                case 0:
+                    _manager.SetScreen(new GameScreen(_manager));
+                    break;
+
+                case 1:
+                    _manager.SetScreen(new SettingsScreen(_manager, _manager.GameSettings));
+                    break;
+
+                case 2:
+                    _manager.SetScreen(new QuitScreen(_manager));
                     break;
             }
         }

@@ -1,6 +1,8 @@
-﻿using Chess.Application.ViewModels;
+﻿using Chess.Application.Models;
+using Chess.Application.ViewModels;
 using Chess.Domain;
 using Chess.Domain.Moves;
+using Chess.Domain.Pieces;
 using Chess.Engine;
 
 namespace Chess.Application
@@ -92,28 +94,6 @@ namespace Chess.Application
             }
         }
 
-        //private bool IsSameCell(Position position)
-        //{
-        //    return _gameScene.SelectedPosition == position;
-        //}
-        //private void DeselectCell()
-        //{
-        //    _gameScene.SelectedPosition = null;
-        //}
-
-        //private bool IsOwnPiece(Position position)
-        //{
-        //    var selectedSquare = _gamePosition.Board.GetSquare(position);
-        //    return selectedSquare.Piece?.Color == _gamePosition.CurrentPlayer;
-        //}
-
-        //private void SelectPiece(Position position)
-        //{
-        //    _gameScene.SelectedPosition = position;
-        //    var moves = _gameEngine.GetLegalMoves(_gamePosition, position).ToList();
-        //    moves.ForEach(m => _gameScene.HighlightedPositions.Add(m.To));
-        //    return;
-        //}
         private SelectionResult SelectPiece(Position position)
         {
             var moves = _gameEngine.GetLegalMoves(_gamePosition, position).Select(m => m.To).ToList();
@@ -212,27 +192,58 @@ namespace Chess.Application
             _gameScene.BlackKingInCheck = _gameEngine.IsKingInCheck(_gamePosition, PieceColor.Black);
         }
 
-        public BoardViewModel GetBoardView()
+        public BoardView GetBoardView()
         {
-            //var vm = new BoardViewModel();
+            var cells = new CellView[Board.BoardSize, Board.BoardSize];
+            var highlights = new HashSet<Position>(_gameScene.HighlightedPositions);
 
-            //for (int row = 0; row < 8; row++) {
-            //    for (int col = 0; col < 8; col++) {
-            //        var square = _gamePosition.Board.GetSquare(new Position(row, col));
+            for (int row = 0; row < Board.BoardSize; row++) {
+                for (int col = 0; col < Board.BoardSize; col++) {
+                    var square = _gamePosition.Board.Squares[row, col];
+                    var cell = new CellView();
 
-            //        vm.Cells[row, col] = square.Piece == null ? ' ' : MapPieceToChar(square.Piece);
-            //    }
-            //}
+                    if (!square.IsEmpty()) {
+                        var piece = square.Piece;
 
-            //vm.Cursor = _gameScene.Cursor;
-            //vm.Highlights = _gameScene.HighlightedPositions.ToList();
+                        cell.PieceView = new PieceView
+                        {
+                            Color = piece.Color == PieceColor.White
+                                ? PieceViewColor.White
+                                : PieceViewColor.Black,
+                            Type = MapPieceType(piece)
+                        };
+                    }
 
-            //return vm;
-            throw new NotImplementedException();
+                    if (highlights.Contains(new Position(row, col)))
+                        cell.IsHighlighted = true;
+
+                    cells[row, col] = cell;
+                }
+            }
+
+            var cursor = _gameScene.Cursor;
+            cells[cursor.Row, cursor.Col].IsCursor = true;
+
+            if (_gameScene.SelectedPosition is Position selected)
+                cells[selected.Row, selected.Col].IsSelected = true;
+
+            return new BoardView { Cells = cells };
         }
-        public MoveHistoryViewModel GetHistoryView()
+
+        private PieceViewType MapPieceType(Piece piece) => piece switch
         {
-            var historyViewModel = new MoveHistoryViewModel();
+            Bishop => PieceViewType.Bishop,
+            Knight => PieceViewType.Knight,
+            Rook => PieceViewType.Rook,
+            Queen => PieceViewType.Queen,
+            King => PieceViewType.King,
+            Pawn => PieceViewType.Pawn,
+            _ => throw new Exception("Unknown piece")
+        };
+
+        public MoveHistoryView GetHistoryView()
+        {
+            var historyViewModel = new MoveHistoryView();
             for(int  i = 0; i < _moveHistory.Count; i++) {
                 var mh = _moveHistory[i];
                 string mitem = $"#{i + 1}.{NotationMapper.PositionToString(mh.From)} - {NotationMapper.PositionToString(mh.To)}";
@@ -243,23 +254,25 @@ namespace Chess.Application
                 else if (mh is EnPassantMove em && em.CapturedPiece != null) {
                     mitem += em.CapturedPiece.ToString();
                 }
-                historyViewModel.MoveHistory.Add(mitem);
+                historyViewModel.Moves.Add(mitem);
             }
             return historyViewModel;
         }
-        public InfoViewModel GetInfoView()
+        public InfoView GetInfoView()
         {
-            var infoViewModel = new InfoViewModel();
+            var infoView = new InfoView()
+            {
+                CurrentPlayer = (_gamePosition.CurrentPlayer == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black),
+                IsCheck = _gameScene.WhiteKingInCheck,
+                IsCheckmate = false //TODO
+            };
+            return infoView;
+        }
 
-            infoViewModel.Info.Add(_gamePosition.CurrentPlayer.ToString() + " turns.");
-
-            if (_gameScene.WhiteKingInCheck)
-                infoViewModel.Info.Add("White King in Check!");
-
-            if(_gameScene.BlackKingInCheck)
-                infoViewModel.Info.Add("Black King in Check!");
-
-            return infoViewModel;
+        public MessageView GetMessageView()
+        {
+            var messageView = new MessageView() { Text = "Your pawn is being promoted!" , Type = MessageType.Promotion };
+            return messageView;
         }
     }
 }

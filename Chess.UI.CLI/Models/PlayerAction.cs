@@ -1,4 +1,4 @@
-﻿namespace Chess.UI.CLI
+﻿namespace Chess.UI.CLI.Models
 {
     public enum PlayerActionType
     {
