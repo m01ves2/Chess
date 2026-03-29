@@ -3,12 +3,10 @@
     public class PromotionMove : Move
     {
         public Piece? PromotionPiece { get; private set; }
-
-        //public bool IsChoicePending { get; set; } = true; // пока игрок не выбрал фигуру
-        //public Type? PromotedPieceType { get; set; } // Queen, Rook, Bishop, Knight     // результат выбора игрока
-
-        public PromotionMove(Position from, Position to, Piece piece) : base(from, to, piece)
+        public Piece? CapturedPiece { get; }
+        public PromotionMove(Position from, Position to, Piece piece, Piece? capturedPiece = null) : base(from, to, piece)
         {
+            CapturedPiece = capturedPiece;
         }
 
         public override void Apply(GamePosition gamePosition)
@@ -17,6 +15,13 @@
             var board = gamePosition.Board;
             board.Squares[To.Row, To.Col].Piece = PromotionPiece;
             board.Squares[From.Row, From.Col].Piece = null;
+
+            if (CapturedPiece != null) {
+                if (CapturedPiece.Color == PieceColor.White)
+                    board.WhiteCaptured.Add(CapturedPiece);
+                else
+                    board.BlackCaptured.Add(CapturedPiece);
+            }
         }
 
         public void SetPromotionPiece(Piece promotionPiece)

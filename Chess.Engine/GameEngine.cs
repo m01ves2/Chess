@@ -1,4 +1,4 @@
-﻿    using Chess.Domain;
+﻿using Chess.Domain;
 using Chess.Domain.Moves;
 using Chess.Domain.Pieces;
 
@@ -34,7 +34,7 @@ namespace Chess.Engine
             }
 
         }
-     
+
         //методы для хода пешки
         private IEnumerable<Move> AddPawnMoves(GamePosition gamePosition, Position pos, Piece pawn)
         {
@@ -67,7 +67,7 @@ namespace Chess.Engine
                 (oneStep.Row == 7 && pawn.Color == PieceColor.Black)) {
                     yield return new PromotionMove(pos, oneStep, pawn);
                 }
-                else {    
+                else {
                     yield return new NormalMove(pos, oneStep, pawn);
                 }
             }
@@ -110,25 +110,32 @@ namespace Chess.Engine
             if (targetSquare.Piece.Color == pawn.Color) //нельзя атаковать своих
                 yield break;
 
-            yield return new NormalMove(pos, target, pawn, targetSquare.Piece);
+            //yield return new NormalMove(pos, target, pawn, targetSquare.Piece);
+            if ((target.Row == 0 && pawn.Color == PieceColor.White) ||
+            (target.Row == 7 && pawn.Color == PieceColor.Black)) {
+                yield return new PromotionMove(pos, target, pawn, targetSquare.Piece);
+            }
+            else {
+                yield return new NormalMove(pos, target, pawn, targetSquare.Piece);
+            }
         }
         private IEnumerable<Move> AddEnPassantMove(GamePosition gamePosition, Position pos, Piece pawn, MoveOffset offset)
         {
-            if(gamePosition.State.EnPassantTarget == null) 
+            if (gamePosition.State.EnPassantTarget == null)
                 yield break; //некого атаковать
 
             var enPassantTarget = gamePosition.State.EnPassantTarget;
-            var enPassantTargetSquare = gamePosition.Board.GetSquare( enPassantTarget.Value);
+            var enPassantTargetSquare = gamePosition.Board.GetSquare(enPassantTarget.Value);
             var step = pos + offset;
             if (enPassantTarget == step) {
                 var capturedPiecePosition = new Position(pos.Row, step.Col);
                 var capturedPiece = gamePosition.Board.GetSquare(capturedPiecePosition).Piece!;
                 yield return new EnPassantMove(pos, step, pawn, capturedPiecePosition, capturedPiece);
             }
-            
+
             yield break;
         }
-        
+
         //  методы для хода не пешки
         private IEnumerable<Move> AddNotPawnMoves(GamePosition gamePosition, Position pos, Piece piece)
         {
@@ -199,7 +206,7 @@ namespace Chess.Engine
         }
         private bool CanCastling(GamePosition gamePosition, Piece king)
         {
-            if(king.Color == PieceColor.White && !gamePosition.State.WhiteKingMoved && !gamePosition.State.WhiteRookH_Moved)
+            if (king.Color == PieceColor.White && !gamePosition.State.WhiteKingMoved && !gamePosition.State.WhiteRookH_Moved)
                 return true;
             if (king.Color == PieceColor.Black && !gamePosition.State.BlackKingMoved && !gamePosition.State.BlackRookH_Moved)
                 return true;
@@ -290,7 +297,7 @@ namespace Chess.Engine
         {
             foreach (var square in gamePosition.Board.Squares)
                 if (square.Piece != null && square.Piece is King && square.Piece.Color == color)
-                     return square;
+                    return square;
             return null;
         }
 
@@ -301,7 +308,7 @@ namespace Chess.Engine
             //var testEngine = new GameEngine(testBoard, testState);
             var testGamePosition = gamePosition.Clone();
             var testEngine = new GameEngine();
-            
+
             testEngine.MakeMove(testGamePosition, move);
             return testEngine.IsKingInCheck(testGamePosition, move.Piece.Color);
         }
