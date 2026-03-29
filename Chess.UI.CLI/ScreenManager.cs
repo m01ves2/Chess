@@ -8,7 +8,6 @@ namespace Chess.UI.CLI
     {
         private BaseScreen _currentScreen;
         public GameSettings GameSettings { get; private set; }
-
         public bool IsExitRequested { get; private set; } = false;
 
         public ScreenManager()
@@ -33,13 +32,14 @@ namespace Chess.UI.CLI
 
         public void HandleInput(PlayerAction action)
         {
-            if (action.Type == PlayerActionType.Escape) {
+            var isHandled = _currentScreen.HandleInput(action); //event spreading emulation
+
+            if (action.Type == PlayerActionType.Escape && !isHandled) {
                 //IsExitRequested = true;
                 SetScreen(new MenuScreen(this));
                 return;
             }
 
-            _currentScreen?.HandleInput(action);
         }
 
         private void RenderResizeWarning()

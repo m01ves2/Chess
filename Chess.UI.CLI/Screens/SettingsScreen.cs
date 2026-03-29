@@ -41,9 +41,9 @@ namespace Chess.UI.CLI.Screens
             _settingsPanel.Render(_settingsView);
         }
 
-        public override void HandleInput(PlayerAction action)
+        public override bool HandleInput(PlayerAction action)
         {
-            if (action == null) return;
+            if (action == null) return false;
 
             switch (action.Type) {
                 case PlayerActionType.MoveDown:
@@ -58,6 +58,7 @@ namespace Chess.UI.CLI.Screens
                 default:
                     break;
             }
+            return false;
         }
 
         public void MoveDown()

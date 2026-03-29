@@ -16,6 +16,6 @@ namespace Chess.UI.CLI.Screens
         }
 
         public abstract void Render();
-        public abstract void HandleInput(PlayerAction action);
+        public abstract bool HandleInput(PlayerAction action);
     }
 }

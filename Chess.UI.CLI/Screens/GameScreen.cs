@@ -85,13 +85,12 @@ namespace Chess.UI.CLI.Screens
             }
         }
 
-        public override void HandleInput(PlayerAction action)
+        public override bool HandleInput(PlayerAction action)
         {
-            if (action == null) return;
+            if (action == null) return false;
 
             if (isPromotion) {
-                HandlePromotion(action);
-                return;
+                return HandlePromotion(action);
             }
 
             switch (action.Type) {
@@ -128,9 +127,10 @@ namespace Chess.UI.CLI.Screens
                 default:
                     break;
             }
+            return false;
         }
 
-        public void HandlePromotion(PlayerAction action)
+        public bool HandlePromotion(PlayerAction action)
         {
             switch (action.Type) {
                 case PlayerActionType.MoveLeft:
@@ -142,17 +142,17 @@ namespace Chess.UI.CLI.Screens
                         promotionCursorCol++;
                     break;
                 case PlayerActionType.Select:
-                    //TODO select promotion
                     var promotionPiece = _promotionView.Cells[0, promotionCursorCol].PieceView.Type;
                     _gameController.CompletePromotion(promotionPiece);
                     break;
                 case PlayerActionType.Escape:
-                    //TODO cancel promotion 
-
-                    break;
+                    _gameController.CancelPromotion();
+                    return true;
+                    
                 default:
                     break;
             }
+            return false;
         }
 
         public void ConsoleResize()

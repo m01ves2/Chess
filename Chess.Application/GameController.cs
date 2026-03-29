@@ -4,9 +4,16 @@ using Chess.Domain;
 using Chess.Domain.Moves;
 using Chess.Domain.Pieces;
 using Chess.Engine;
+using System.ComponentModel;
 
 namespace Chess.Application
 {
+    public enum GameStatus
+    {
+        Playing, 
+        GameOver,
+    };
+
     public class GameController
     {
         private readonly GameScene _gameScene;
@@ -22,7 +29,10 @@ namespace Chess.Application
         private List<Move> _moveHistory { get; set; } = new List<Move>();
         private Stack<GameSnapshot> _snapshotHistory = new Stack<GameSnapshot>();
 
-        private bool _isGameOver = false;
+
+        private GameStatus _gameState = GameStatus.Playing;
+        private bool _isGameOver => _gameState == GameStatus.GameOver;
+        public PieceColor Winner { get; private set; }
 
         public GameController()
         {
@@ -98,30 +108,10 @@ namespace Chess.Application
             _ => new Queen(_gamePosition.CurrentPlayer),
         };
 
-        //public void Handle(PlayerAction action)
-        //{
-        //    // если ждём promotion
-        //    if (_pendingPromotion != null) {
-        //        if (action.Type == PlayerActionType.Promotion) {
-        //            CompletePromotion(action.PromotionPiece.Value);
-        //        }
-        //        else if (action.Type == PlayerActionType.Cancel) {
-        //            CancelPromotion();
-        //        }
-
-        //        return; // всё остальное игнорируем
-        //    }
-
-        //    // обычная логика
-        //    HandleNormal(action);
-        //}
-
-        private void CancelPromotion()
+        public void CancelPromotion()
         {
             _pendingPromotion = null;
-
-            // возможно:
-            // сбросить выбор клетки
+            _gameScene.ClearSelection();
         }
 
 
@@ -139,13 +129,18 @@ namespace Chess.Application
             _gamePosition = snapshot.ToGamePosition();
         }
 
-        public void DoMove(Move move)
+        private void DoMove(Move move)
         {
             _snapshotHistory.Push(CreateSnapshot()); // snapshot ДО хода
             _gameEngine.MakeMove(_gamePosition, move);      // применяем ход один раз
             _moveHistory.Add(move);
             SwitchPlayer();
             UpdateGameScene();
+
+            if (_gameEngine.IsCheckmate(_gamePosition, _gamePosition.CurrentPlayer)) {
+                _gameState = GameStatus.GameOver;
+                Winner = _gamePosition.CurrentPlayer;
+            }
         }
 
         public void UndoMove()
@@ -287,7 +282,7 @@ namespace Chess.Application
             {
                 CurrentPlayer = (_gamePosition.CurrentPlayer == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black),
                 IsCheck = _gameScene.WhiteKingInCheck,
-                IsCheckmate = false, //TODO
+                IsCheckmate = false,
                 IsPromoted = IsPromotionPending,
             };
             return infoView;

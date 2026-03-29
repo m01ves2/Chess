@@ -19,8 +19,6 @@ namespace Chess.UI.CLI
                     return new PlayerAction(PlayerActionType.MoveUp);
                 case ConsoleKey.DownArrow:
                     return new PlayerAction(PlayerActionType.MoveDown);
-                case ConsoleKey.Escape:
-                    return new PlayerAction(PlayerActionType.Escape);
                 case ConsoleKey.N:
                     return new PlayerAction(PlayerActionType.NewGame);
                 case ConsoleKey.U:
@@ -29,6 +27,8 @@ namespace Chess.UI.CLI
                     return new PlayerAction(PlayerActionType.PageUp);
                 case ConsoleKey.PageDown:
                     return new PlayerAction(PlayerActionType.PageDown);
+                case ConsoleKey.Escape:
+                    return new PlayerAction(PlayerActionType.Escape);
                 default:
                     return new PlayerAction(PlayerActionType.None);
             }

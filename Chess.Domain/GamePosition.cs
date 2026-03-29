@@ -22,5 +22,15 @@
         }
         public GamePosition Clone() => new GamePosition(Board.Clone(), State.Clone(), CurrentPlayer);
 
+        public IEnumerable<Square> GetSquaresWithPlayerPieces(PieceColor player)
+        {
+            List<Square> squares = new List<Square>();
+            foreach (var square in Board.Squares) {
+                if(!square.IsEmpty() && square.Piece.Color == player)
+                    squares.Add(square);
+            }
+            return squares;
+        }
+
     }
 }

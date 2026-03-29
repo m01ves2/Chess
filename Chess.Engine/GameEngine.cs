@@ -312,5 +312,20 @@ namespace Chess.Engine
             testEngine.MakeMove(testGamePosition, move);
             return testEngine.IsKingInCheck(testGamePosition, move.Piece.Color);
         }
+
+        public bool IsCheckmate(GamePosition gamePosition, PieceColor player)
+        {
+            return IsKingInCheck(gamePosition, player) && !HasAnyLegalMoves(gamePosition, player);
+        }
+
+        private bool HasAnyLegalMoves(GamePosition position, PieceColor player)
+        {
+            foreach (var square in position.GetSquaresWithPlayerPieces(player)) {
+                var moves = GetLegalMoves(position, square.Position);
+                if (moves.Any())
+                    return true;
+            }
+            return false;
+        }
     }
 }

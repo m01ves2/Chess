@@ -18,9 +18,10 @@ namespace Chess.UI.CLI.Screens
             _quitPanel.Render(_quitView);
         }
 
-        public override void HandleInput(PlayerAction action)
+        public override bool HandleInput(PlayerAction action)
         {
             _manager.RequestExit();
+            return false;
         }
 
     }
