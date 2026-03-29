@@ -74,7 +74,7 @@ namespace Chess.UI.CLI.Panels.BasePanels
                     var prev = _prevBuffer[row, col];
 
                     if (!current.Equals(prev)) {
-                        Console.SetCursorPosition(X + col, Y + row);
+                        Console.SetCursorPosition(X + 1 + col, Y + 1 + row);
 
                         Console.ForegroundColor = current.fg;
                         Console.BackgroundColor = current.bg;

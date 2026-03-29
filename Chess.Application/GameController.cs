@@ -13,6 +13,9 @@ namespace Chess.Application
         private readonly GameEngine _gameEngine;
         private GamePosition _gamePosition;
 
+        private PromotionMove? _pendingPromotion;
+        public bool IsPromotionPending => _pendingPromotion != null;
+
         public GamePosition Position => _gamePosition;
         public GameScene Scene => _gameScene;
 
@@ -30,45 +33,6 @@ namespace Chess.Application
             // добавляем стартовый snapshot в стек
             _snapshotHistory.Push(CreateSnapshot());
         }
-
-        // Обработка действия игрока
-        //public void ProcessAction(PlayerAction action)
-        //{
-        //    if (action == null) return;
-
-        //    switch (action.Type) {
-        //        case PlayerActionType.MoveUp:
-        //            MoveCursor(-1, 0);
-        //            break;
-        //        case PlayerActionType.MoveDown:
-        //            MoveCursor(1, 0);
-        //            break;
-        //        case PlayerActionType.MoveLeft:
-        //            MoveCursor(0, -1);
-        //            break;
-        //        case PlayerActionType.MoveRight:
-        //            MoveCursor(0, 1);
-        //            break;
-
-        //        case PlayerActionType.Select:
-        //            Select(_gameScene.Cursor);
-        //            break;
-                
-
-        //        case PlayerActionType.Undo:
-        //            UndoMove();
-        //            break;
-        //        case PlayerActionType.NewGame:
-        //            // TODO: сброс игры
-        //            break;
-        //        case PlayerActionType.Quit:
-        //            _isGameOver = true;
-        //            break; // завершаем игру
-
-        //        default:
-        //            break;
-        //    }
-        //}
 
         public void Select(Position position)
         {
@@ -109,7 +73,55 @@ namespace Chess.Application
             if (move == null)
                 return;
 
+            if (move is PromotionMove promotionMove) {
+                _pendingPromotion = promotionMove; // НЕ делаем ход
+                return;
+            }
             DoMove(move);
+        }
+
+        public void CompletePromotion(PieceViewType type)
+        {
+            if (_pendingPromotion == null)
+                return;
+            var piece = Convert(type);
+            _pendingPromotion.SetPromotionPiece(piece);
+            DoMove(_pendingPromotion);
+            _pendingPromotion = null;
+        }
+        private Piece Convert(PieceViewType type) => type switch
+        {
+            PieceViewType.Queen => new Queen(_gamePosition.CurrentPlayer),
+            PieceViewType.Rook => new Rook(_gamePosition.CurrentPlayer),
+            PieceViewType.Knight => new Knight(_gamePosition.CurrentPlayer),
+            PieceViewType.Bishop => new Bishop(_gamePosition.CurrentPlayer),
+            _ => new Queen(_gamePosition.CurrentPlayer),
+        };
+
+        //public void Handle(PlayerAction action)
+        //{
+        //    // если ждём promotion
+        //    if (_pendingPromotion != null) {
+        //        if (action.Type == PlayerActionType.Promotion) {
+        //            CompletePromotion(action.PromotionPiece.Value);
+        //        }
+        //        else if (action.Type == PlayerActionType.Cancel) {
+        //            CancelPromotion();
+        //        }
+
+        //        return; // всё остальное игнорируем
+        //    }
+
+        //    // обычная логика
+        //    HandleNormal(action);
+        //}
+
+        private void CancelPromotion()
+        {
+            _pendingPromotion = null;
+
+            // возможно:
+            // сбросить выбор клетки
         }
 
 
@@ -129,13 +141,6 @@ namespace Chess.Application
 
         public void DoMove(Move move)
         {
-            //if (move is PromotionMove pm && pm.IsChoicePending) {
-            //    // вызвать UI, чтобы игрок выбрал фигуру
-            //    var chosen = _gameScene.AskPromotionChoice(pm.Piece.Color, pm.To); // метод возвращает Type
-            //    pm.PromotedPieceType = chosen;
-            //    pm.IsChoicePending = false;
-            //}
-
             _snapshotHistory.Push(CreateSnapshot()); // snapshot ДО хода
             _gameEngine.MakeMove(_gamePosition, move);      // применяем ход один раз
             _moveHistory.Add(move);
@@ -244,10 +249,10 @@ namespace Chess.Application
         public MoveHistoryView GetHistoryView()
         {
             var historyViewModel = new MoveHistoryView();
-            for(int  i = 0; i < _moveHistory.Count; i++) {
+            for (int i = 0; i < _moveHistory.Count; i++) {
                 var mh = _moveHistory[i];
                 string mitem = $"#{i + 1}.{NotationMapper.PositionToString(mh.From)} - {NotationMapper.PositionToString(mh.To)}";
-                
+
                 if (mh is NormalMove nm && nm.CapturedPiece != null) {
                     mitem += GetSymbol(nm.CapturedPiece);
                 }
@@ -282,15 +287,22 @@ namespace Chess.Application
             {
                 CurrentPlayer = (_gamePosition.CurrentPlayer == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black),
                 IsCheck = _gameScene.WhiteKingInCheck,
-                IsCheckmate = false //TODO
+                IsCheckmate = false, //TODO
+                IsPromoted = IsPromotionPending,
             };
             return infoView;
         }
 
-        public MessageView GetMessageView()
+        public CapturedView GetCapturedView()
         {
-            var messageView = new MessageView() { Text = "Your pawn is being promoted!" , Type = MessageType.Promotion };
-            return messageView;
+            var capturedView = new CapturedView();
+            foreach (var captured in _gamePosition.Board.WhiteCaptured) {
+                capturedView.WhiteCaptured.Add(MapPieceType(captured));
+            }
+            foreach (var captured in _gamePosition.Board.BlackCaptured) {
+                capturedView.BlackCaptured.Add(MapPieceType(captured));
+            }
+            return capturedView;
         }
     }
 }

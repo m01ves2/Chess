@@ -1,4 +1,5 @@
 ﻿using Chess.Application;
+using Chess.Application.ViewModels;
 using Chess.Domain;
 using Chess.UI.CLI.Panels.BasePanels.Rendering;
 using static System.Formats.Asn1.AsnWriter;
@@ -24,6 +25,8 @@ namespace Chess.UI.CLI.Panels.BasePanels
             Y = y;
             Width = width;
             Height = height;
+
+            ClearPanel(); //очистка пространства для новорождённой панели
         }
 
         public void Render(ViewType view)
@@ -102,6 +105,26 @@ namespace Chess.UI.CLI.Panels.BasePanels
         protected void PrintNormal(string text)
         {
             Console.WriteLine(text);
+        }
+
+        protected static char GetSymbol(PieceViewType type, PieceViewColor color)
+        {
+            return (type, color) switch
+            {
+                (PieceViewType.Rook, PieceViewColor.White) => '\u2656',
+                (PieceViewType.Rook, PieceViewColor.Black) => '\u265C',
+                (PieceViewType.Knight, PieceViewColor.White) => '\u2658',
+                (PieceViewType.Knight, PieceViewColor.Black) => '\u265E',
+                (PieceViewType.Bishop, PieceViewColor.White) => '\u2657',
+                (PieceViewType.Bishop, PieceViewColor.Black) => '\u265D',
+                (PieceViewType.Queen, PieceViewColor.White) => '\u2655',
+                (PieceViewType.Queen, PieceViewColor.Black) => '\u265B',
+                (PieceViewType.King, PieceViewColor.White) => '\u2654',
+                (PieceViewType.King, PieceViewColor.Black) => '\u265A',
+                (PieceViewType.Pawn, PieceViewColor.White) => '\u2659',
+                (PieceViewType.Pawn, PieceViewColor.Black) => '\u265F',
+                _ => '?'
+            };
         }
     }
 }

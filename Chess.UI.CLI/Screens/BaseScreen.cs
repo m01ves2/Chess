@@ -13,7 +13,6 @@ namespace Chess.UI.CLI.Screens
         public BaseScreen(ScreenManager manager)
         {
             _manager = manager;
-            Console.Clear();
         }
 
         public abstract void Render();

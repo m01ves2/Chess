@@ -5,5 +5,6 @@
         public PieceViewColor CurrentPlayer;
         public bool IsCheck;
         public bool IsCheckmate;
+        public bool IsPromoted;
     }
 }

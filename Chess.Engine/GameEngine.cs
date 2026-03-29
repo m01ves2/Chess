@@ -6,13 +6,6 @@ namespace Chess.Engine
 {
     public class GameEngine
     {
-        //public void UpdateBoard(Board board)
-        //{
-        //    _board = board;
-        //}
-
-        //public GameState GetState() => _state;
-
         public IEnumerable<Move> GetLegalMoves(GamePosition gamePosition, Position from)
         {
             var pseudoMoves = GeneratePseudoMoves(gamePosition, from);
@@ -22,7 +15,6 @@ namespace Chess.Engine
                     continue;
                 }
             }
-            //return pseudoMoves;
         }
 
         private IEnumerable<Move> GeneratePseudoMoves(GamePosition gamePosition, Position pos)
@@ -73,7 +65,7 @@ namespace Chess.Engine
             if (gamePosition.Board.GetSquare(oneStep).IsEmpty()) {
                 if ((oneStep.Row == 0 && pawn.Color == PieceColor.White) ||
                 (oneStep.Row == 7 && pawn.Color == PieceColor.Black)) {
-                    yield return new PromotionMove(pos, oneStep, pawn, true);
+                    yield return new PromotionMove(pos, oneStep, pawn);
                 }
                 else {    
                     yield return new NormalMove(pos, oneStep, pawn);
@@ -136,20 +128,7 @@ namespace Chess.Engine
             
             yield break;
         }
-
-        //public void AddPromotePawn(Piece piece, Position pos)
-        //{
-        //    if (piece is not Pawn pawn) 
-        //        return;
-
-        //    if (pawn.Color == PieceColor.White && pos.Row == 0)
-        //        piece = new Queen(PieceColor.White);
-        //    else if(pawn.Color == PieceColor.Black && pos.Row == 7)
-        //        piece = new Queen(PieceColor.Black);
-
-        //}
-
-
+        
         //  методы для хода не пешки
         private IEnumerable<Move> AddNotPawnMoves(GamePosition gamePosition, Position pos, Piece piece)
         {

@@ -28,7 +28,7 @@ namespace Chess.UI.CLI.Panels
         {
             //Верхняя нумерация файлов(a - h)
             int d = 1;
-            int XOffset = 1;
+            int XOffset = 0;
             int YOffset = 1;
             for (char f = 'a'; f <= 'h'; f++) {
                 _buffer[YOffset, _cellWidth * d + XOffset].Symbol = f;
@@ -40,7 +40,7 @@ namespace Chess.UI.CLI.Panels
         private void BuildRanks()
         {
             //Левый столбец с рангами(1 - 8)
-            int YOffset = 4;
+            int YOffset = 3;
             int XOffset = 1;
             for (int r = 0; r < _boardSize; r++) {
                 _buffer[r * _cellHeight + YOffset, XOffset].Symbol = char.Parse((8 - r).ToString());
@@ -92,29 +92,10 @@ namespace Chess.UI.CLI.Panels
         {
             return pieceView == null ? ' ' : GetSymbol(pieceView.Type, pieceView.Color);
         }
-        private static char GetSymbol(PieceViewType type, PieceViewColor color)
-        {
-            return (type, color) switch
-            {
-                (PieceViewType.Rook, PieceViewColor.White) => '\u2656',
-                (PieceViewType.Rook, PieceViewColor.Black) => '\u265C',
-                (PieceViewType.Knight, PieceViewColor.White) => '\u2658',
-                (PieceViewType.Knight, PieceViewColor.Black) => '\u265E',
-                (PieceViewType.Bishop, PieceViewColor.White) => '\u2657',
-                (PieceViewType.Bishop, PieceViewColor.Black) => '\u265D',
-                (PieceViewType.Queen, PieceViewColor.White) => '\u2655',
-                (PieceViewType.Queen, PieceViewColor.Black) => '\u265B',
-                (PieceViewType.King, PieceViewColor.White) => '\u2654',
-                (PieceViewType.King, PieceViewColor.Black) => '\u265A',
-                (PieceViewType.Pawn, PieceViewColor.White) => '\u2659',
-                (PieceViewType.Pawn, PieceViewColor.Black) => '\u265F',
-                _ => '?'
-            };
-        }
         private void BuildCell(int row, int col, char pieceSymbol, ConsoleColor bg, ConsoleColor fg, bool isCursor)
         {
-            int XOffset = 3;
-            int YOffset = 3;
+            int XOffset = 2;
+            int YOffset = 2;
 
             int x = XOffset + col * _cellWidth;
             int y = YOffset + row * _cellHeight;
@@ -150,7 +131,6 @@ namespace Chess.UI.CLI.Panels
             _buffer[y + 2, x + 1].fg = fg;
             _buffer[y + 2, x + 2].fg = fg;
         }
-
         private (int row, int col) Rotate180(int row, int col)
         {
             return (7 - row, 7 - col);

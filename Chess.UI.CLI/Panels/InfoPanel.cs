@@ -16,11 +16,14 @@ namespace Chess.UI.CLI.Panels
 
             AddLine(new LineRender() { Text = $"{view.CurrentPlayer} turn", Style = LineStyle.None });
 
-            if(view.IsCheck)
+            if (view.IsCheck)
                 AddLine(new LineRender() { Text = $"King in Check!", Style = LineStyle.Selected });
 
-            if(view.IsCheckmate)
+            if (view.IsCheckmate)
                 AddLine(new LineRender() { Text = $"King in Checkmate!", Style = LineStyle.Selected });
+
+            if (view.IsPromoted)
+                AddLine(new LineRender() { Text = "Your pawn is being promoted! Choose piece", Style = LineStyle.Selected });
         }
     }
 }

@@ -1,13 +1,8 @@
 ﻿namespace Chess.Application.ViewModels
 {
-    public enum MessageType
+    public class CapturedView
     {
-       None,
-       Promotion,
-    }
-    public class MessageView
-    {
-        public MessageType Type;
-        public string? Text;
+        public List<PieceViewType> WhiteCaptured { get; set; } = new List<PieceViewType>();
+        public List<PieceViewType> BlackCaptured { get; set; } = new List<PieceViewType>();
     }
 }
