@@ -27,7 +27,7 @@ namespace Chess.Application.ViewModels
     {
         public PieceView? PieceView { get; set; }
 
-        public bool IsCursor { get; set; } = false;
+        //public bool IsCursor { get; set; } = false;
         public bool IsSelected { get; set; } = false;
         public bool IsHighlighted { get; set; } = false;
     }
@@ -35,5 +35,6 @@ namespace Chess.Application.ViewModels
     public class BoardView
     {
         public CellView[,] Cells { get; set; }
+        public PieceViewColor currentPlayer { get; set; } 
     }
 }

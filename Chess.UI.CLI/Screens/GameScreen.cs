@@ -1,9 +1,12 @@
 ﻿using Chess.Application;
+using Chess.Application.Models;
 using Chess.Application.ViewModels;
 using Chess.Domain;
 using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels;
+using Chess.UI.CLI.Screens.BaseScreens;
 using Chess.UI.CLI.Views;
+using System.Data;
 
 namespace Chess.UI.CLI.Screens
 {
@@ -12,25 +15,28 @@ namespace Chess.UI.CLI.Screens
         private readonly GameController _gameController;
 
         private BoardPanel _boardPanel;
+        bool isBoardFlipped = false;
+
         private HistoryPanel _historyPanel;
+        
         private InfoPanel _infoPanel;
+        
         private CapturedPanel _capturedPanel;
+
         
         private PromotionPanel _promotionPanel;
         private BoardView _promotionView;
         private bool isPromotion = true;
-        private int promotionCursorCol = 0;
-
-        private int ConsoleWidth = Console.WindowWidth;
-        private int ConsoleHeight = Console.WindowHeight;
+        
+        private GameOverPanel _gameOverPanel;
+        private GameOverView _gameOverView;
 
         public GameScreen(ScreenManager manager) : base(manager)
         {
-            Init();
             _gameController = new GameController();
         }
 
-        private void Init()
+        protected override void Init()
         {
             Console.Clear();
 
@@ -43,9 +49,10 @@ namespace Chess.UI.CLI.Screens
             _capturedPanel = new CapturedPanel(0, boardPanelHeight, leftPanelWidth, Console.WindowHeight - boardPanelHeight);
             _infoPanel = new InfoPanel(leftPanelWidth, 0, rightPanelWidth, infoPanelHeight);
             _historyPanel = new HistoryPanel(leftPanelWidth, infoPanelHeight, rightPanelWidth, Console.WindowHeight - infoPanelHeight);
-            //_historyPanel = new HistoryPanel(leftPanelWidth, infoPanelHeight, rightPanelWidth, 7);
 
             _promotionPanel = new PromotionPanel(8, 12, 14, 5);
+            _gameOverPanel = new GameOverPanel(5, 12, 20, 6 );
+
         }
 
         private void RenderPromotionView()
@@ -56,7 +63,12 @@ namespace Chess.UI.CLI.Screens
             _promotionView.Cells[0, 1] = new CellView() { PieceView = new PieceView() { Color = PieceViewColor.Black, Type = PieceViewType.Rook } };
             _promotionView.Cells[0, 2] = new CellView() { PieceView = new PieceView() { Color = PieceViewColor.Black, Type = PieceViewType.Bishop } };
             _promotionView.Cells[0, 3] = new CellView() { PieceView = new PieceView() { Color = PieceViewColor.Black, Type = PieceViewType.Knight } };
-            _promotionView.Cells[0, promotionCursorCol].IsCursor = true;
+            //_promotionView.Cells[promotionCursor.Row, promotionCursor.Col].IsCursor = true;
+        }
+
+        private void RenderGameOveView()
+        {
+            _gameOverView = new GameOverView() { GameOverItems = new List<string>() { "G A M E  O V E R !", " ", $"{_gameController.Winner} side wins!" } };
         }
 
         public override void Render()
@@ -67,7 +79,8 @@ namespace Chess.UI.CLI.Screens
             //        && _controller.CurrentPlayer == PieceColor.Black;
 
             var boardView = _gameController.GetBoardView();
-            _boardPanel.Render(boardView);
+            isBoardFlipped = (_manager.GameSettings.WhitePlayer == PlayerType.Human && boardView.currentPlayer == PieceViewColor.Black);
+            _boardPanel.Render(new BoardDisplayView() { BoardView = boardView, IsBoardFlipped = isBoardFlipped });
 
             var historyView = _gameController.GetHistoryView();
             _historyPanel.Render(historyView);
@@ -83,6 +96,11 @@ namespace Chess.UI.CLI.Screens
                 RenderPromotionView();
                 _promotionPanel.Render(_promotionView);
             }
+
+            if (_gameController.IsGameOver()) {
+                RenderGameOveView();
+                _gameOverPanel.Render(_gameOverView);
+            }
         }
 
         public override bool HandleInput(PlayerAction action)
@@ -95,20 +113,24 @@ namespace Chess.UI.CLI.Screens
 
             switch (action.Type) {
                 case PlayerActionType.MoveUp:
-                    _gameController.MoveCursor(-1, 0);
+                    //_gameController.MoveCursor(-1, 0);
+                    _boardPanel.MoveUp();
                     break;
                 case PlayerActionType.MoveDown:
-                    _gameController.MoveCursor(1, 0);
+                    //_gameController.MoveCursor(1, 0);
+                    _boardPanel.MoveDown();
                     break;
                 case PlayerActionType.MoveLeft:
-                    _gameController.MoveCursor(0, -1);
+                    //_gameController.MoveCursor(0, -1);
+                    _boardPanel.MoveLeft();
                     break;
                 case PlayerActionType.MoveRight:
-                    _gameController.MoveCursor(0, 1);
+                    //_gameController.MoveCursor(0, 1);
+                    _boardPanel.MoveRight();
                     break;
 
                 case PlayerActionType.Select:
-                    _gameController.Select(_gameController.Scene.Cursor);
+                    _gameController.Select(_boardPanel.boardCursor.Row, _boardPanel.boardCursor.Col);
                     break;
 
                 case PlayerActionType.Undo:
@@ -134,15 +156,13 @@ namespace Chess.UI.CLI.Screens
         {
             switch (action.Type) {
                 case PlayerActionType.MoveLeft:
-                    if (promotionCursorCol > 0)
-                        promotionCursorCol--;
+                    _promotionPanel.MoveLeft();
                     break;
                 case PlayerActionType.MoveRight:
-                    if (promotionCursorCol < _promotionView.Cells.Length - 1)
-                        promotionCursorCol++;
+                    _promotionPanel.MoveRight();
                     break;
                 case PlayerActionType.Select:
-                    var promotionPiece = _promotionView.Cells[0, promotionCursorCol].PieceView.Type;
+                    var promotionPiece =  _promotionPanel.Select(_promotionView);
                     _gameController.CompletePromotion(promotionPiece);
                     break;
                 case PlayerActionType.Escape:
@@ -155,39 +175,5 @@ namespace Chess.UI.CLI.Screens
             return false;
         }
 
-        public void ConsoleResize()
-        {
-            //int w = Console.WindowWidth;
-            //int h = Console.WindowHeight;
-
-            //bool tooSmall = w < MinWidth || h < MinHeight;
-
-            //if (tooSmall) {
-            //    if (!_isTooSmall) {
-            //        _isTooSmall = true;
-            //        Console.Clear();
-            //    }
-
-            //    ShowResizeWarning();
-            //    return;
-            //}
-
-            //// если только что восстановились
-            //if (_isTooSmall) {
-            //    _isTooSmall = false;
-            //    RebuildLayout();
-            //    return;
-            //}
-
-            // обычный resize
-            //if (w != ConsoleWidth || h != ConsoleHeight) {
-            //    ConsoleWidth = w;
-            //    ConsoleHeight = h;
-            //    RebuildLayout();
-            //}
-
-            if (Console.WindowHeight != ConsoleHeight || Console.WindowWidth != ConsoleWidth)
-                Init();
-        }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Chess.Application.ViewModels;
+﻿using Chess.Application;
+using Chess.Application.ViewModels;
+using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels.BasePanels;
 
 namespace Chess.UI.CLI.Panels
@@ -7,7 +9,10 @@ namespace Chess.UI.CLI.Panels
     {
         private const int _cellWidth = 3;
         private const int _cellHeight = 3;
-        private const int _boardSizeWidth = 4;
+        private const int _promotionBoardWidth = 4;
+
+        private UiPosition promotionCursor = new UiPosition(0, 0);
+        private BoardView _promotionView;
 
         public PromotionPanel(int x, int y, int width, int height) : base(x, y, width, height)
         {
@@ -15,14 +20,14 @@ namespace Chess.UI.CLI.Panels
 
         public override void BuildBuffer(BoardView view)
         {
-            for (int col = 0; col < _boardSizeWidth; col++) {
+            for (int col = 0; col < _promotionBoardWidth; col++) {
                 RenderCell(col, view);
             }
         }
         private void RenderCell(int col, BoardView view)
         {
             var cell = view.Cells[0, col];
-            bool isCursor = cell.IsCursor;
+            bool isCursor = promotionCursor.Col == col && promotionCursor.Row == 0;
 
             var pieceSymbol = GetPieceSymbol(cell.PieceView.Type);
 
@@ -77,6 +82,23 @@ namespace Chess.UI.CLI.Panels
             _buffer[2, x].fg = fg;
             _buffer[2, x + 1].fg = fg;
             _buffer[2, x + 2].fg = fg;
+        }
+
+        public void MoveLeft()
+        {
+            if (promotionCursor.Col > 0)
+                promotionCursor.Col--;
+        }
+
+        public void MoveRight()
+        {
+            if (promotionCursor.Col < _promotionBoardWidth - 1)
+                promotionCursor.Col++;
+        }
+
+        public PieceViewType Select(BoardView promotionView)
+        {
+            return _promotionView.Cells[promotionCursor.Row, promotionCursor.Col].PieceView.Type;
         }
     }
 }

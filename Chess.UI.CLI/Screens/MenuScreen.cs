@@ -1,6 +1,7 @@
 ﻿using Chess.Application.Models;
 using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels;
+using Chess.UI.CLI.Screens.BaseScreens;
 using Chess.UI.CLI.Views;
 
 namespace Chess.UI.CLI.Screens

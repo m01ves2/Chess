@@ -44,8 +44,9 @@ namespace Chess.Application
             _snapshotHistory.Push(CreateSnapshot());
         }
 
-        public void Select(Position position)
+        public void Select(int row, int col)
         {
+            Position position = new Position(row, col);
             // Сброс подсветки, если новая клетка выбрана
             var selectedSquare = _gamePosition.Board.GetSquare(position);
             _gameScene.HighlightedPositions.Clear();
@@ -137,9 +138,9 @@ namespace Chess.Application
             SwitchPlayer();
             UpdateGameScene();
 
-            if (_gameEngine.IsCheckmate(_gamePosition, _gamePosition.CurrentPlayer)) {
+            if (_gameEngine.IsCheckmate(_gamePosition, _gamePosition.CurrentPlayer )) {
                 _gameState = GameStatus.GameOver;
-                Winner = _gamePosition.CurrentPlayer;
+                Winner = _gamePosition.CurrentPlayer == PieceColor.White ? PieceColor.Black : PieceColor.White;
             }
         }
 
@@ -173,12 +174,12 @@ namespace Chess.Application
             _gamePosition.SwitchTurn();
         }
 
-        public void MoveCursor(int dRow, int dCol)
-        {
-            var newPosition = new Position(_gameScene.Cursor.Row + dRow, _gameScene.Cursor.Col + dCol);
-            if (_gamePosition.Board.IsInsideBoard(newPosition))
-                _gameScene.Cursor = newPosition;
-        }
+        //public void MoveCursor(int dRow, int dCol)
+        //{
+        //    var newPosition = new Position(_gameScene.Cursor.Row + dRow, _gameScene.Cursor.Col + dCol);
+        //    if (_gamePosition.Board.IsInsideBoard(newPosition))
+        //        _gameScene.Cursor = newPosition;
+        //}
 
         public bool IsGameOver()
         {
@@ -221,13 +222,15 @@ namespace Chess.Application
                 }
             }
 
-            var cursor = _gameScene.Cursor;
-            cells[cursor.Row, cursor.Col].IsCursor = true;
+            ////var cursor = _gameScene.Cursor;
+            //cells[cursor.Row, cursor.Col].IsCursor = true; //это теперь живёт в UI
 
             if (_gameScene.SelectedPosition is Position selected)
                 cells[selected.Row, selected.Col].IsSelected = true;
+            
+            var currentPlayer = _gamePosition.CurrentPlayer;
 
-            return new BoardView { Cells = cells };
+            return new BoardView { Cells = cells, currentPlayer = currentPlayer == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black };
         }
 
         private PieceViewType MapPieceType(Piece piece) => piece switch
@@ -281,8 +284,7 @@ namespace Chess.Application
             var infoView = new InfoView()
             {
                 CurrentPlayer = (_gamePosition.CurrentPlayer == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black),
-                IsCheck = _gameScene.WhiteKingInCheck,
-                IsCheckmate = false,
+                IsCheck = _gameScene.WhiteKingInCheck || _gameScene.BlackKingInCheck,
                 IsPromoted = IsPromotionPending,
             };
             return infoView;

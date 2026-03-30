@@ -88,8 +88,8 @@ namespace Chess.UI.CLI.Panels.BasePanels
 
         protected void ClearBuffer()
         {
-            for (int r = 0; r < Height; r++)
-                for (int c = 0; c < Width; c++)
+            for (int r = 0; r < InnerHeight; r++)
+                for (int c = 0; c < InnerWidth; c++)
                     _buffer[r, c].Symbol = ' ';
         }
     }

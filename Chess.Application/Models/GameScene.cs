@@ -15,7 +15,7 @@ namespace Chess.Application.Models
 
         // Добавляем состояние сцены для UI
         // UI / игровое состояние
-        public Position Cursor { get; set; } = new Position(0, 0); // позиция курсора
+        //public Position Cursor { get; set; } = new Position(0, 0); // позиция курсора
         public Position? SelectedPosition { get; private set; } // выбранная клетка
         public List<Position> HighlightedPositions { get; } = new List<Position>(); // возможные ходы для фигуры на выбранной клетке
         
@@ -29,7 +29,7 @@ namespace Chess.Application.Models
             //PlayerWhite = new Player(PieceColor.White);
             //PlayerBlack = new Player(PieceColor.Black);
             //CurrentPlayer = PieceColor.White;
-            Cursor = new Position(5, 4);
+            //Cursor = new Position(5, 4);
         }
 
         public void UpdateMoveHistory(IEnumerable<Move> moves)

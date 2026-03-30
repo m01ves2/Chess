@@ -2,48 +2,71 @@
 using Chess.Application.ViewModels;
 using Chess.Domain;
 using Chess.Domain.Pieces;
+using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels.BasePanels;
 using Chess.UI.CLI.Screens;
+using Chess.UI.CLI.Views;
 using System.Data;
 
 namespace Chess.UI.CLI.Panels
 {
-    public class BoardPanel : GraphicsPanelBase<BoardView>
+    public class BoardPanel : GraphicsPanelBase<BoardDisplayView>
     {
         private const int _cellWidth = 3;
         private const int _cellHeight = 3;
+
         private const int _boardSize = 8;
+        
+        private UiPosition cursor; //[0...7, 0...7]
+        private bool _flipped = false;
+        public UiPosition boardCursor => _flipped ? Rotate180(cursor) : cursor;
 
         public BoardPanel(int x, int y, int width, int height) : base(x, y, width, height)
         {
+            cursor = new UiPosition(_boardSize/2, _boardSize/2);
         }
 
-        public override void BuildBuffer(BoardView view)
+        public override void BuildBuffer(BoardDisplayView view)
         {
-            RenderFiles();
-            BuildBoard(view);
-            BuildRanks();
+            if (view.IsBoardFlipped)
+                RotateView180(view);
+
+            RenderFiles(view.IsBoardFlipped);
+            BuildBoard(view.BoardView);
+            BuildRanks(view.IsBoardFlipped);
+
         }
-        private void RenderFiles()
+        private void RenderFiles(bool flipped)
         {
             //Верхняя нумерация файлов(a - h)
             int d = 1;
             int XOffset = 0;
             int YOffset = 1;
-            for (char f = 'a'; f <= 'h'; f++) {
-                _buffer[YOffset, _cellWidth * d + XOffset].Symbol = f;
+            for (int f = 0; f < _boardSize; f++) {
+                if (flipped) {
+                    _buffer[YOffset, _cellWidth * d + XOffset].Symbol = (char)('h' - f);
+                }
+                else {
+                    _buffer[YOffset, _cellWidth * d + XOffset].Symbol = (char)('a' + f);
+                }
                 _buffer[YOffset, _cellWidth * d + XOffset].fg = ConsoleColor.Yellow;
                 _buffer[YOffset, _cellWidth * d + XOffset].bg = ConsoleColor.Black;
                 d++;
             }
         }
-        private void BuildRanks()
+        private void BuildRanks(bool flipped)
         {
+            _flipped = flipped;
             //Левый столбец с рангами(1 - 8)
             int YOffset = 3;
             int XOffset = 1;
             for (int r = 0; r < _boardSize; r++) {
-                _buffer[r * _cellHeight + YOffset, XOffset].Symbol = char.Parse((8 - r).ToString());
+                if (flipped) {
+                    _buffer[r * _cellHeight + YOffset, XOffset].Symbol = char.Parse((8 - r).ToString());
+                }
+                else {
+                    _buffer[r * _cellHeight + YOffset, XOffset].Symbol = char.Parse((1 + r).ToString());
+                }
                 _buffer[r * _cellHeight + YOffset, XOffset].fg = ConsoleColor.Yellow;
                 _buffer[r * _cellHeight + YOffset, XOffset].bg = ConsoleColor.Black;
             }
@@ -59,7 +82,8 @@ namespace Chess.UI.CLI.Panels
         private void RenderCell(int row, int col, BoardView view)
         {
             var cell = view.Cells[row, col];
-            bool isCursor = cell.IsCursor;
+            //bool isCursor = cell.IsCursor;
+            bool isCursor = (cursor.Row == row && cursor.Col == col);
             bool isSelected = cell.IsSelected;
             bool isHighlighted = cell.IsHighlighted;
 
@@ -94,11 +118,11 @@ namespace Chess.UI.CLI.Panels
         }
         private void BuildCell(int row, int col, char pieceSymbol, ConsoleColor bg, ConsoleColor fg, bool isCursor)
         {
-            int XOffset = 2;
-            int YOffset = 2;
+            int _boardXOffset = 2;
+            int _boardYOffset = 2;
 
-            int x = XOffset + col * _cellWidth;
-            int y = YOffset + row * _cellHeight;
+            int x = _boardXOffset + col * _cellWidth;
+            int y = _boardYOffset + row * _cellHeight;
 
             //top
             _buffer[y, x    ].Symbol = isCursor ? '┌' : ' ';
@@ -131,9 +155,51 @@ namespace Chess.UI.CLI.Panels
             _buffer[y + 2, x + 1].fg = fg;
             _buffer[y + 2, x + 2].fg = fg;
         }
-        private (int row, int col) Rotate180(int row, int col)
+
+        private void RotateView180(BoardDisplayView view)
         {
-            return (7 - row, 7 - col);
+            var board = view.BoardView.Cells;
+            int height = board.GetLength(0);
+            int width = board.GetLength(1);
+
+            for (int y = 0; y < height / 2; y++) {
+                for (int x = 0; x < width; x++) {
+                    int oppY = height - 1 - y;
+                    int oppX = width - 1 - x;
+
+                    var tmp = board[y, x];
+                    board[y, x] = board[oppY, oppX];
+                    board[oppY, oppX] = tmp;
+                }
+            }
+        }
+        public UiPosition Rotate180(UiPosition uiPosition)
+        {
+            return new UiPosition(7 - uiPosition.Row, 7 - uiPosition.Col);
+        }
+
+        public void MoveUp()
+        {
+            if (cursor.Row > 0)
+                cursor.Row--;
+        }
+
+        public void MoveDown()
+        {
+            if(cursor.Row < _boardSize - 1)
+                cursor.Row++;
+        }
+
+        public void MoveLeft()
+        {
+            if(cursor.Col > 0) {
+                cursor.Col--;
+            }
+        }
+        public void MoveRight()
+        {
+            if(cursor.Col < _boardSize - 1)
+                cursor.Col++;
         }
     }
 }
