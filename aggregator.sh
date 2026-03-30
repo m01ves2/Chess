@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Директории для обработки
-dirs=("Chess.Domain" "Chess.Engine" "Chess.UI.CLI" "Chess.CompositionRoot" "Chess.Application")
+dirs=("Chess.Domain" "Chess.Engine" "Chess.Application" "Chess.UI.CLI" "Chess.CompositionRoot")
 output="result.txt"
 
 # Очищаем результат

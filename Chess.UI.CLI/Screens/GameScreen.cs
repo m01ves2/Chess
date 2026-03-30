@@ -25,7 +25,7 @@ namespace Chess.UI.CLI.Screens
 
         
         private PromotionPanel _promotionPanel;
-        private BoardView _promotionView;
+        //private BoardView _promotionView;
         private bool isPromotion = true;
         
         private GameOverPanel _gameOverPanel;
@@ -55,15 +55,16 @@ namespace Chess.UI.CLI.Screens
 
         }
 
-        private void RenderPromotionView()
+        private BoardView RenderPromotionView()
         {
-            _promotionView = new BoardView();
-            _promotionView.Cells = new CellView[1, 4];
-            _promotionView.Cells[0, 0] = new CellView() { PieceView = new PieceView() { Color = PieceViewColor.Black, Type = PieceViewType.Queen } };
-            _promotionView.Cells[0, 1] = new CellView() { PieceView = new PieceView() { Color = PieceViewColor.Black, Type = PieceViewType.Rook } };
-            _promotionView.Cells[0, 2] = new CellView() { PieceView = new PieceView() { Color = PieceViewColor.Black, Type = PieceViewType.Bishop } };
-            _promotionView.Cells[0, 3] = new CellView() { PieceView = new PieceView() { Color = PieceViewColor.Black, Type = PieceViewType.Knight } };
+            var promotionView = new BoardView();
+            promotionView.Cells = new CellView[1, 4];
+            promotionView.Cells[0, 0] = new CellView() { PieceView = new PieceView() { Color = PieceViewColor.Black, Type = PieceViewType.Queen } };
+            promotionView.Cells[0, 1] = new CellView() { PieceView = new PieceView() { Color = PieceViewColor.Black, Type = PieceViewType.Rook } };
+            promotionView.Cells[0, 2] = new CellView() { PieceView = new PieceView() { Color = PieceViewColor.Black, Type = PieceViewType.Bishop } };
+            promotionView.Cells[0, 3] = new CellView() { PieceView = new PieceView() { Color = PieceViewColor.Black, Type = PieceViewType.Knight } };
             //_promotionView.Cells[promotionCursor.Row, promotionCursor.Col].IsCursor = true;
+            return promotionView;
         }
 
         private void RenderGameOveView()
@@ -93,8 +94,8 @@ namespace Chess.UI.CLI.Screens
 
             isPromotion = _gameController.IsPromotionPending;
             if (isPromotion) {
-                RenderPromotionView();
-                _promotionPanel.Render(_promotionView);
+                var promotionView =  RenderPromotionView();
+                _promotionPanel.Render(promotionView);
             }
 
             if (_gameController.IsGameOver()) {
@@ -162,7 +163,7 @@ namespace Chess.UI.CLI.Screens
                     _promotionPanel.MoveRight();
                     break;
                 case PlayerActionType.Select:
-                    var promotionPiece =  _promotionPanel.Select(_promotionView);
+                    var promotionPiece =  _promotionPanel.Select();
                     _gameController.CompletePromotion(promotionPiece);
                     break;
                 case PlayerActionType.Escape:
