@@ -1,4 +1,5 @@
-﻿using Chess.UI.CLI;
+﻿using Chess.Application;
+using Chess.UI.CLI;
 using Chess.UI.CLI.Interfaces;
 using Chess.UI.CLI.Screens;
 
@@ -20,10 +21,11 @@ namespace Chess.CompositionRoot
                 Console.WriteLine("Can't start chess game");
             }
 
-            ScreenManager screenManager = new ScreenManager();
-            screenManager.SetScreen(new MenuScreen(screenManager));
+            GameController gameController = new GameController();
+            ScreenManager screenManager = new ScreenManager(gameController);
+            screenManager.SetScreen(new MenuScreen(screenManager, gameController));
             IInputHandler inputHandler = new CLIInputHandler();
-            GameLoop gameLoop = new GameLoop(screenManager, inputHandler);
+            GameLoop gameLoop = new GameLoop(gameController, screenManager, inputHandler);
             gameLoop.Run();
         }
 

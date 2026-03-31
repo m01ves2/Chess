@@ -1,4 +1,5 @@
-﻿using Chess.Application.Models;
+﻿using Chess.Application;
+using Chess.Application.Models;
 using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Screens;
 using Chess.UI.CLI.Screens.BaseScreens;
@@ -10,10 +11,14 @@ namespace Chess.UI.CLI
         private BaseScreen _currentScreen;
         public GameSettings GameSettings { get; private set; }
         public bool IsExitRequested { get; private set; } = false;
+        public bool IsStartGameRequested { get; private set; } = false;
 
-        public ScreenManager()
+        private GameController _gameController;
+
+        public ScreenManager(GameController gameController)
         {
             GameSettings = new GameSettings();
+            _gameController = gameController;
         }
 
         public void SetScreen(BaseScreen screen)
@@ -37,7 +42,7 @@ namespace Chess.UI.CLI
 
             if (action.Type == PlayerActionType.Escape && !isHandled) {
                 //IsExitRequested = true;
-                SetScreen(new MenuScreen(this));
+                SetScreen(new MenuScreen(this, _gameController));
                 return;
             }
 
@@ -53,6 +58,11 @@ namespace Chess.UI.CLI
         public void RequestExit()
         {
             IsExitRequested = true;
+        }
+
+        public void RequestStartGame()
+        {
+            IsStartGameRequested = true;
         }
     }
 }

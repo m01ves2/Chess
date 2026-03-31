@@ -23,5 +23,6 @@
 
             board.Squares[CapturedPiecePosition.Row, CapturedPiecePosition.Col].Piece = null;
         }
+
     }
 }

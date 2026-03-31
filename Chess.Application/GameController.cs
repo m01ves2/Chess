@@ -4,38 +4,39 @@ using Chess.Domain;
 using Chess.Domain.Moves;
 using Chess.Domain.Pieces;
 using Chess.Engine;
-using System.ComponentModel;
 
 namespace Chess.Application
 {
-    public enum GameStatus
-    {
-        Playing, 
-        GameOver,
-    };
 
     public class GameController
     {
+        public Guid Id { get; } = Guid.NewGuid();
+
         private readonly GameScene _gameScene;
         private readonly GameEngine _gameEngine;
         private GamePosition _gamePosition;
 
-        private PromotionMove? _pendingPromotion;
-        public bool IsPromotionPending => _pendingPromotion != null;
+        private PromotionMove? _pendingPromotionMove;
+        private Move? _pendingMove;
+        public bool IsPromotionPending => _pendingPromotionMove != null;
 
-        public GamePosition Position => _gamePosition;
+        public GamePosition GamePosition => _gamePosition;
         public GameScene Scene => _gameScene;
 
         private List<Move> _moveHistory { get; set; } = new List<Move>();
         private Stack<GameSnapshot> _snapshotHistory = new Stack<GameSnapshot>();
 
 
-        private GameStatus _gameState = GameStatus.Playing;
-        private bool _isGameOver => _gameState == GameStatus.GameOver;
+        private bool _isGameOver = false;
+        public bool IsGameOver => _isGameOver;
         public PieceColor Winner { get; private set; }
+
 
         public GameController()
         {
+            //Console.WriteLine($"Controller ID: {Id}");
+            System.Diagnostics.Debug.WriteLine($"Controller ID: {Id}");
+
             _gameScene = new GameScene();
             _gamePosition = new GamePosition(new Board(), new GameState(), PieceColor.White);
             _gameEngine = new GameEngine();
@@ -46,6 +47,9 @@ namespace Chess.Application
 
         public void Select(int row, int col)
         {
+
+            System.Diagnostics.Debug.WriteLine($"Select: Controller ID: {Id}");
+
             Position position = new Position(row, col);
             // Сброс подсветки, если новая клетка выбрана
             var selectedSquare = _gamePosition.Board.GetSquare(position);
@@ -69,7 +73,7 @@ namespace Chess.Application
             }
         }
 
-        private SelectionResult SelectPiece(Position position)
+        private SelectionResult SelectPiece(Position position) //TODO убрать SelectionResult! просто отдавать moves
         {
             var moves = _gameEngine.GetLegalMoves(_gamePosition, position).Select(m => m.To).ToList();
             return new SelectionResult(position, moves);
@@ -78,6 +82,9 @@ namespace Chess.Application
 
         public void TryMakeMove(Position from, Position to)
         {
+
+            System.Diagnostics.Debug.WriteLine($"TryMakeMove: Controller ID: {Id}");
+
             var moves = _gameEngine.GetLegalMoves(_gamePosition, from);
             var move = moves.FirstOrDefault(m => m.To == to);
 
@@ -85,20 +92,31 @@ namespace Chess.Application
                 return;
 
             if (move is PromotionMove promotionMove) {
-                _pendingPromotion = promotionMove; // НЕ делаем ход
+                _pendingPromotionMove = promotionMove; // НЕ делаем ход
                 return;
             }
-            DoMove(move);
+            //DoMove(move);
+
+            _pendingMove = move;
+        }
+
+        public Move? TryGetPendingMove()
+        {
+            System.Diagnostics.Debug.WriteLine($"TryGetPendingMove: Controller ID: {Id}");
+            return _pendingMove;
         }
 
         public void CompletePromotion(PieceViewType type)
         {
-            if (_pendingPromotion == null)
+            if (_pendingPromotionMove == null)
                 return;
             var piece = Convert(type);
-            _pendingPromotion.SetPromotionPiece(piece);
-            DoMove(_pendingPromotion);
-            _pendingPromotion = null;
+            _pendingPromotionMove.SetPromotionPiece(piece);
+
+            //DoMove(_pendingPromotion);
+            _pendingMove = _pendingPromotionMove;
+
+            //_pendingPromotionMove = null; //TODO
         }
         private Piece Convert(PieceViewType type) => type switch
         {
@@ -111,35 +129,29 @@ namespace Chess.Application
 
         public void CancelPromotion()
         {
-            _pendingPromotion = null;
+            _pendingPromotionMove = null;
             _gameScene.ClearSelection();
         }
 
+        //public Move? GetPendingMove()
+        //{
+        //     return _pendingMove;
+        //}
 
-        private GameSnapshot CreateSnapshot()
+        public void DoMove(Move move)
         {
-            var boardCopy = _gamePosition.Board.Clone();        // глубокая копия
-            var stateCopy = _gamePosition.State.Clone();        // тоже копия
-            var playerCopy = _gamePosition.CurrentPlayer;
+            if (move == null) return;
 
-            return new GameSnapshot(boardCopy, stateCopy, playerCopy);
-        }
-
-        private void RestoreSnapshot(GameSnapshot snapshot)
-        {
-            _gamePosition = snapshot.ToGamePosition();
-        }
-
-        private void DoMove(Move move)
-        {
             _snapshotHistory.Push(CreateSnapshot()); // snapshot ДО хода
             _gameEngine.MakeMove(_gamePosition, move);      // применяем ход один раз
             _moveHistory.Add(move);
+            //_pendingMove = null;
             SwitchPlayer();
             UpdateGameScene();
 
             if (_gameEngine.IsCheckmate(_gamePosition, _gamePosition.CurrentPlayer )) {
-                _gameState = GameStatus.GameOver;
+                //_gameState = GameStatus.GameOver;
+                _isGameOver = true;
                 Winner = _gamePosition.CurrentPlayer == PieceColor.White ? PieceColor.Black : PieceColor.White;
             }
         }
@@ -159,31 +171,21 @@ namespace Chess.Application
 
         private void SwitchPlayer()
         {
-            //_gameScene.CurrentPlayer = (_gameScene.CurrentPlayer == _gameScene.PlayerWhite) ?
-            //               _gameScene.PlayerBlack : _gameScene.PlayerWhite;
-
-            //if( _gameScene.CurrentPlayer == _gameScene.PlayerWhite.Color) {
-            //    _gameScene.CurrentPlayer = _gameScene.PlayerBlack.Color;
-            //    _gameScene.Cursor = new Position(2, 3);
-            //}
-            //else {
-            //    _gameScene.CurrentPlayer = _gameScene.PlayerWhite.Color;
-            //    _gameScene.Cursor = new Position(5, 4);
-            //}
-
             _gamePosition.SwitchTurn();
         }
 
-        //public void MoveCursor(int dRow, int dCol)
-        //{
-        //    var newPosition = new Position(_gameScene.Cursor.Row + dRow, _gameScene.Cursor.Col + dCol);
-        //    if (_gamePosition.Board.IsInsideBoard(newPosition))
-        //        _gameScene.Cursor = newPosition;
-        //}
-
-        public bool IsGameOver()
+        private GameSnapshot CreateSnapshot()
         {
-            return _isGameOver;
+            var boardCopy = _gamePosition.Board.Clone();        // глубокая копия
+            var stateCopy = _gamePosition.State.Clone();        // тоже копия
+            var playerCopy = _gamePosition.CurrentPlayer;
+
+            return new GameSnapshot(boardCopy, stateCopy, playerCopy);
+        }
+
+        private void RestoreSnapshot(GameSnapshot snapshot)
+        {
+            _gamePosition = snapshot.ToGamePosition();
         }
 
         public void UpdateGameScene()
@@ -221,9 +223,6 @@ namespace Chess.Application
                     cells[row, col] = cell;
                 }
             }
-
-            ////var cursor = _gameScene.Cursor;
-            //cells[cursor.Row, cursor.Col].IsCursor = true; //это теперь живёт в UI
 
             if (_gameScene.SelectedPosition is Position selected)
                 cells[selected.Row, selected.Col].IsSelected = true;
@@ -300,6 +299,11 @@ namespace Chess.Application
                 capturedView.BlackCaptured.Add(MapPieceType(captured));
             }
             return capturedView;
+        }
+
+        public IEnumerable<Move>  GetAllLegalMoves()
+        {
+            return _gameEngine.GetAllLegalMoves(_gamePosition, _gamePosition.CurrentPlayer);
         }
     }
 }

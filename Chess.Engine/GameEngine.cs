@@ -318,14 +318,24 @@ namespace Chess.Engine
             return IsKingInCheck(gamePosition, player) && !HasAnyLegalMoves(gamePosition, player);
         }
 
-        private bool HasAnyLegalMoves(GamePosition position, PieceColor player)
+        private bool HasAnyLegalMoves(GamePosition gamePosition, PieceColor player)
         {
-            foreach (var square in position.GetSquaresWithPlayerPieces(player)) {
-                var moves = GetLegalMoves(position, square.Position);
+            foreach (var square in gamePosition.GetSquaresWithPlayerPieces(player)) {
+                var moves = GetLegalMoves(gamePosition, square.Position);
                 if (moves.Any())
                     return true;
             }
             return false;
+        }
+
+
+        public IEnumerable<Move> GetAllLegalMoves(GamePosition gamePosition, PieceColor player)
+        {
+            foreach (var square in gamePosition.GetSquaresWithPlayerPieces(player)) {
+                foreach (var move in GetLegalMoves(gamePosition, square.Position)) {
+                    yield return move;
+                }
+            }
         }
     }
 }

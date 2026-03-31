@@ -1,6 +1,6 @@
 ﻿using Chess.Domain;
 
-namespace Chess.Application.Interfaces
+namespace Chess.CompositionRoot.Players
 {
     public interface IPlayer
     {

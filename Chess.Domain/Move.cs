@@ -14,5 +14,8 @@
         }
 
         public abstract void Apply(GamePosition gamePosition);
+        
     }
+
+
 }

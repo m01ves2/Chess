@@ -1,12 +1,10 @@
 ﻿using Chess.Application;
 using Chess.Application.Models;
 using Chess.Application.ViewModels;
-using Chess.Domain;
 using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels;
 using Chess.UI.CLI.Screens.BaseScreens;
 using Chess.UI.CLI.Views;
-using System.Data;
 
 namespace Chess.UI.CLI.Screens
 {
@@ -31,9 +29,9 @@ namespace Chess.UI.CLI.Screens
         private GameOverPanel _gameOverPanel;
         private GameOverView _gameOverView;
 
-        public GameScreen(ScreenManager manager) : base(manager)
+        public GameScreen(ScreenManager manager, GameController gameController) : base(manager)
         {
-            _gameController = new GameController();
+            _gameController = gameController;
         }
 
         protected override void Init()
@@ -98,7 +96,7 @@ namespace Chess.UI.CLI.Screens
                 _promotionPanel.Render(promotionView);
             }
 
-            if (_gameController.IsGameOver()) {
+            if (_gameController.IsGameOver) {
                 RenderGameOveView();
                 _gameOverPanel.Render(_gameOverView);
             }
@@ -138,7 +136,7 @@ namespace Chess.UI.CLI.Screens
                     _gameController.UndoMove();
                     break;
                 case PlayerActionType.NewGame:
-                    _manager.SetScreen(new GameScreen(_manager));
+                    _manager.SetScreen(new GameScreen(_manager, _gameController));
                     break;
 
                 case PlayerActionType.PageUp:
