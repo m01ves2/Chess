@@ -1,4 +1,4 @@
-﻿namespace Chess.Application.ViewModels
+﻿namespace Chess.Application.Views
 {
     public class CapturedView
     {

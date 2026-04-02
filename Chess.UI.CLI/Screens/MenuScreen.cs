@@ -14,8 +14,8 @@ namespace Chess.UI.CLI.Screens
         private MenuView _menuView;
         private GameController _gameController;
 
-        public MenuScreen(ScreenManager manager, GameController gameController) : base(manager) {
-            _gameController = gameController;
+        public MenuScreen(ScreenManager manager/*, GameController gameController*/) : base(manager) {
+            //_gameController = gameController;
             _menuPanel = new MenuPanel(0, 0, Console.WindowWidth, Console.WindowHeight);
             _menuView = new MenuView() { MenuItems = new List<string>() { "1. New Game", "2. Settings", "3. Quit" }, selectedIndex = 0 };
         }
@@ -65,7 +65,7 @@ namespace Chess.UI.CLI.Screens
             switch (_menuView.selectedIndex) {
                 case 0:
                     
-                    _manager.SetScreen(new GameScreen(_manager, _gameController, _manager.GameSettings));
+                    _manager.SetScreen(new GameScreen(_manager, /* _gameController,*/ _manager.GameSettings));
                     //_manager.RequestStartGame();
                     break;
 

@@ -1,4 +1,4 @@
-﻿using Chess.Application.ViewModels;
+﻿using Chess.Application.Views;
 
 namespace Chess.UI.CLI.Views
 {

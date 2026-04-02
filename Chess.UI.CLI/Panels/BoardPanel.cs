@@ -1,12 +1,7 @@
-﻿using Chess.Application.Models;
-using Chess.Application.ViewModels;
-using Chess.Domain;
-using Chess.Domain.Pieces;
+﻿using Chess.Application.Views;
 using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels.BasePanels;
-using Chess.UI.CLI.Screens;
 using Chess.UI.CLI.Views;
-using System.Data;
 
 namespace Chess.UI.CLI.Panels
 {

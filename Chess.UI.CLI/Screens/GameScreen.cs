@@ -1,6 +1,6 @@
 ﻿using Chess.Application;
 using Chess.Application.Models;
-using Chess.Application.ViewModels;
+using Chess.Application.Views;
 using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels;
 using Chess.UI.CLI.Screens.BaseScreens;
@@ -10,7 +10,7 @@ namespace Chess.UI.CLI.Screens
 {
     public class GameScreen : BaseScreen
     {
-        private readonly GameController _gameController;
+        //private readonly GameController _gameController;
 
         private BoardPanel _boardPanel;
         bool isBoardFlipped = false;
@@ -31,10 +31,10 @@ namespace Chess.UI.CLI.Screens
 
         private GameChess _gameChess;
 
-        public GameScreen(ScreenManager manager, GameController gameController, GameSettings gameSettings) : base(manager)
+        public GameScreen(ScreenManager manager, /*GameController gameController,*/ GameSettings gameSettings) : base(manager)
         {
-            _gameController = gameController;
-            _gameChess = new GameChess(gameController, gameSettings);
+            //_gameController = gameController;
+            _gameChess = new GameChess(/*gameController, */gameSettings);
         }
 
         public override void Tick()
@@ -75,7 +75,7 @@ namespace Chess.UI.CLI.Screens
 
         private void RenderGameOverView()
         {
-            _gameOverView = new GameOverView() { GameOverItems = new List<string>() { "G A M E  O V E R !", " ", $"{_gameController.Winner} side wins!" } };
+            _gameOverView = new GameOverView() { GameOverItems = new List<string>() { "G A M E  O V E R !", " ", $"{_gameChess.Winner} side wins!" } };
         }
 
         public override void Render()
@@ -85,17 +85,17 @@ namespace Chess.UI.CLI.Screens
             //bool rotate = _mode == GameMode.HumanVsHuman
             //        && _controller.CurrentPlayer == PieceColor.Black;
 
-            var boardView = _gameController.GetBoardView();
-            isBoardFlipped = (_manager.GameSettings.WhitePlayer == PlayerType.Human && boardView.currentPlayer == PieceViewColor.Black);
+            var boardView = _gameChess.GetBoardView();
+            isBoardFlipped = (_manager.GameSettings.BlackPlayer == PlayerType.Human && boardView.currentPlayer == PieceViewColor.Black);
             _boardPanel.Render(new BoardDisplayView() { BoardView = boardView, IsBoardFlipped = isBoardFlipped });
 
-            var historyView = _gameController.GetHistoryView();
+            var historyView = _gameChess.GetHistoryView();
             _historyPanel.Render(historyView);
 
-            var infoView = _gameController.GetInfoView();
+            var infoView = _gameChess.GetInfoView();
             _infoPanel.Render(infoView);
 
-            var capturedView = _gameController.GetCapturedView();
+            var capturedView = _gameChess.GetCapturedView();
             _capturedPanel.Render(capturedView);
 
             isPromotion = _gameController.IsPromotionPending;
@@ -104,7 +104,7 @@ namespace Chess.UI.CLI.Screens
                 _promotionPanel.Render(promotionView);
             }
 
-            if (_gameController.IsGameOver) {
+            if (_gameChess.IsGameOver) {
                 RenderGameOverView();
                 _gameOverPanel.Render(_gameOverView);
             }
@@ -142,7 +142,7 @@ namespace Chess.UI.CLI.Screens
                     break;
 
                 case PlayerActionType.Undo:
-                    _gameController.UndoMove();
+                    _gameChess.UndoMove();
                     break;
                 //case PlayerActionType.NewGame:
                 //    _manager.SetScreen(new GameScreen(_manager, _gameController, _game));

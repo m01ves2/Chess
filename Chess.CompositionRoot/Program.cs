@@ -13,10 +13,10 @@ namespace Chess.CompositionRoot
                 Console.WriteLine("Can't start chess game");
             }
 
-            GameController gameController = new GameController();
-            IInputHandler inputHandler = new CLIInputHandler();
-            ScreenManager screenManager = new ScreenManager(gameController, inputHandler);
-            screenManager.SetScreen(new MenuScreen(screenManager, gameController));
+            //GameController gameController = new GameController();
+            //IInputHandler inputHandler = new CLIInputHandler();
+            ScreenManager screenManager = new ScreenManager();
+            //screenManager.SetScreen(new MenuScreen(screenManager));
             
             //GameLoop gameLoop = new GameLoop(gameController, screenManager, inputHandler);
             //gameLoop.Run();

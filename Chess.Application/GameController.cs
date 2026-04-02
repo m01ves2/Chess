@@ -1,5 +1,5 @@
 ﻿using Chess.Application.Models;
-using Chess.Application.ViewModels;
+using Chess.Application.Views;
 using Chess.Domain;
 using Chess.Domain.Moves;
 using Chess.Domain.Pieces;
@@ -21,9 +21,11 @@ namespace Chess.Application
         public bool IsPromotionPending => _pendingPromotionMove != null;
 
         public GamePosition GamePosition => _gamePosition;
-        public GameScene Scene => _gameScene;
+        //public GameScene Scene => _gameScene;
+
 
         private List<Move> _moveHistory { get; set; } = new List<Move>();
+
         private Stack<GameSnapshot> _snapshotHistory = new Stack<GameSnapshot>();
 
 
@@ -129,7 +131,7 @@ namespace Chess.Application
         public void CancelPromotion()
         {
             _pendingPromotionMove = null;
-            _gameScene.ClearSelection();
+            //_gameScene.ClearSelection();
         }
 
         //public Move? GetPendingMove()
@@ -157,8 +159,8 @@ namespace Chess.Application
 
         public void UndoMove()
         {
-            _gameScene.ClearSelection();
-            _gameScene.HighlightedPositions.Clear();
+            //_gameScene.ClearSelection();
+            //_gameScene.HighlightedPositions.Clear();
             if (_snapshotHistory.Count > 1 && _moveHistory.Count > 0) {
                 var snapshot = _snapshotHistory.Pop();
                 _moveHistory.Remove(_moveHistory.Last());
@@ -189,120 +191,123 @@ namespace Chess.Application
 
         public void UpdateGameScene()
         {
-            _gameScene.UpdateMoveHistory(_moveHistory);
+            //_gameScene.UpdateMoveHistory(_moveHistory);
             _gameScene.WhiteKingInCheck = _gameEngine.IsKingInCheck(_gamePosition, PieceColor.White);
             _gameScene.BlackKingInCheck = _gameEngine.IsKingInCheck(_gamePosition, PieceColor.Black);
         }
 
-        public BoardView GetBoardView()
-        {
-            var cells = new CellView[Board.BoardSize, Board.BoardSize];
-            var highlights = new HashSet<Position>(_gameScene.HighlightedPositions);
+        //public BoardView GetBoardView()
+        //{
+        //    var cells = new CellView[Board.BoardSize, Board.BoardSize];
+        //    var highlights = new HashSet<Position>(_gameScene.HighlightedPositions);
 
-            for (int row = 0; row < Board.BoardSize; row++) {
-                for (int col = 0; col < Board.BoardSize; col++) {
-                    var square = _gamePosition.Board.Squares[row, col];
-                    var cell = new CellView();
+        //    for (int row = 0; row < Board.BoardSize; row++) {
+        //        for (int col = 0; col < Board.BoardSize; col++) {
+        //            var square = _gamePosition.Board.Squares[row, col];
+        //            var cell = new CellView();
 
-                    if (!square.IsEmpty()) {
-                        var piece = square.Piece;
+        //            if (!square.IsEmpty()) {
+        //                var piece = square.Piece;
 
-                        cell.PieceView = new PieceView
-                        {
-                            Color = piece.Color == PieceColor.White
-                                ? PieceViewColor.White
-                                : PieceViewColor.Black,
-                            Type = MapPieceType(piece)
-                        };
-                    }
+        //                cell.PieceView = new PieceView
+        //                {
+        //                    Color = piece.Color == PieceColor.White
+        //                        ? PieceViewColor.White
+        //                        : PieceViewColor.Black,
+        //                    Type = MapPieceType(piece)
+        //                };
+        //            }
 
-                    if (highlights.Contains(new Position(row, col)))
-                        cell.IsHighlighted = true;
+        //            if (highlights.Contains(new Position(row, col)))
+        //                cell.IsHighlighted = true;
 
-                    cells[row, col] = cell;
-                }
-            }
+        //            cells[row, col] = cell;
+        //        }
+        //    }
 
-            if (_gameScene.SelectedPosition is Position selected)
-                cells[selected.Row, selected.Col].IsSelected = true;
+        //    if (_gameScene.SelectedPosition is Position selected)
+        //        cells[selected.Row, selected.Col].IsSelected = true;
             
-            var currentPlayer = _gamePosition.CurrentPlayer;
+        //    var currentPlayer = _gamePosition.CurrentPlayer;
 
-            return new BoardView { Cells = cells, currentPlayer = currentPlayer == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black };
-        }
+        //    return new BoardView { Cells = cells, currentPlayer = currentPlayer == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black };
+        //}
 
-        private PieceViewType MapPieceType(Piece piece) => piece switch
-        {
-            Bishop => PieceViewType.Bishop,
-            Knight => PieceViewType.Knight,
-            Rook => PieceViewType.Rook,
-            Queen => PieceViewType.Queen,
-            King => PieceViewType.King,
-            Pawn => PieceViewType.Pawn,
-            _ => throw new Exception("Unknown piece")
-        };
+        //private PieceViewType MapPieceType(Piece piece) => piece switch
+        //{
+        //    Bishop => PieceViewType.Bishop,
+        //    Knight => PieceViewType.Knight,
+        //    Rook => PieceViewType.Rook,
+        //    Queen => PieceViewType.Queen,
+        //    King => PieceViewType.King,
+        //    Pawn => PieceViewType.Pawn,
+        //    _ => throw new Exception("Unknown piece")
+        //};
 
-        public MoveHistoryView GetHistoryView()
-        {
-            var historyViewModel = new MoveHistoryView();
-            for (int i = 0; i < _moveHistory.Count; i++) {
-                var mh = _moveHistory[i];
-                string mitem = $"#{i + 1}.{NotationMapper.PositionToString(mh.From)} - {NotationMapper.PositionToString(mh.To)}";
+        //public MoveHistoryView GetHistoryView()
+        //{
+        //    var historyViewModel = new MoveHistoryView();
+        //    for (int i = 0; i < _moveHistory.Count; i++) {
+        //        var mh = _moveHistory[i];
+        //        string mitem = $"#{i + 1}.{NotationMapper.PositionToString(mh.From)} - {NotationMapper.PositionToString(mh.To)}";
 
-                if (mh is NormalMove nm && nm.CapturedPiece != null) {
-                    mitem += GetSymbol(nm.CapturedPiece);
-                }
-                else if (mh is EnPassantMove em && em.CapturedPiece != null) {
-                    mitem += GetSymbol(em.CapturedPiece);
-                }
-                historyViewModel.Moves.Add(mitem);
-            }
-            return historyViewModel;
-        }
+        //        if (mh is NormalMove nm && nm.CapturedPiece != null) {
+        //            mitem += GetSymbol(nm.CapturedPiece);
+        //        }
+        //        else if (mh is EnPassantMove em && em.CapturedPiece != null) {
+        //            mitem += GetSymbol(em.CapturedPiece);
+        //        }
+        //        historyViewModel.Moves.Add(mitem);
+        //    }
+        //    return historyViewModel;
+        //}
 
-        private static char GetSymbol(Piece piece) => piece switch
-        {
-            Rook r when r.Color == PieceColor.White => '\u2656',
-            Rook r => '\u265C',
-            Knight n when n.Color == PieceColor.White => '\u2658',
-            Knight n => '\u265E',
-            Bishop b when b.Color == PieceColor.White => '\u2657',
-            Bishop b => '\u265D',
-            Queen q when q.Color == PieceColor.White => '\u2655',
-            Queen q => '\u265B',
-            King k when k.Color == PieceColor.White => '\u2654',
-            King k => '\u265A',
-            Pawn p when p.Color == PieceColor.White => '\u2659',
-            Pawn p => '\u265F',
-            _ => '?'
-        };
+        //private static char GetSymbol(Piece piece) => piece switch
+        //{
+        //    Rook r when r.Color == PieceColor.White => '\u2656',
+        //    Rook r => '\u265C',
+        //    Knight n when n.Color == PieceColor.White => '\u2658',
+        //    Knight n => '\u265E',
+        //    Bishop b when b.Color == PieceColor.White => '\u2657',
+        //    Bishop b => '\u265D',
+        //    Queen q when q.Color == PieceColor.White => '\u2655',
+        //    Queen q => '\u265B',
+        //    King k when k.Color == PieceColor.White => '\u2654',
+        //    King k => '\u265A',
+        //    Pawn p when p.Color == PieceColor.White => '\u2659',
+        //    Pawn p => '\u265F',
+        //    _ => '?'
+        //};
 
-        public InfoView GetInfoView()
-        {
-            var infoView = new InfoView()
-            {
-                CurrentPlayer = (_gamePosition.CurrentPlayer == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black),
-                IsCheck = _gameScene.WhiteKingInCheck || _gameScene.BlackKingInCheck,
-                IsPromoted = IsPromotionPending,
-            };
-            return infoView;
-        }
+        //public InfoView GetInfoView()
+        //{
+        //    var infoView = new InfoView()
+        //    {
+        //        CurrentPlayer = (_gamePosition.CurrentPlayer == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black),
+        //        IsCheck = _gameScene.WhiteKingInCheck || _gameScene.BlackKingInCheck,
+        //        IsPromoted = IsPromotionPending,
+        //    };
+        //    return infoView;
+        //}
 
-        public CapturedView GetCapturedView()
-        {
-            var capturedView = new CapturedView();
-            foreach (var captured in _gamePosition.Board.WhiteCaptured) {
-                capturedView.WhiteCaptured.Add(MapPieceType(captured));
-            }
-            foreach (var captured in _gamePosition.Board.BlackCaptured) {
-                capturedView.BlackCaptured.Add(MapPieceType(captured));
-            }
-            return capturedView;
-        }
+        //public CapturedView GetCapturedView()
+        //{
+        //    var capturedView = new CapturedView();
+        //    foreach (var captured in _gamePosition.Board.WhiteCaptured) {
+        //        capturedView.WhiteCaptured.Add(MapPieceType(captured));
+        //    }
+        //    foreach (var captured in _gamePosition.Board.BlackCaptured) {
+        //        capturedView.BlackCaptured.Add(MapPieceType(captured));
+        //    }
+        //    return capturedView;
+        //}
 
         public IEnumerable<Move>  GetAllLegalMoves()
         {
             return _gameEngine.GetAllLegalMoves(_gamePosition, _gamePosition.CurrentPlayer);
         }
+
+        public Board GetBoard() => _gamePosition.Board;
+        public IReadOnlyList<Move> GetMoveHistory() => _moveHistory;
     }
 }

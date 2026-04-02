@@ -1,4 +1,4 @@
-﻿using Chess.Application.ViewModels;
+﻿using Chess.Application.Views;
 using Chess.UI.CLI.Panels.BasePanels;
 using Chess.UI.CLI.Panels.BasePanels.Rendering;
 

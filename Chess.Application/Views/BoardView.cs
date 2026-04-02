@@ -1,6 +1,6 @@
 ﻿using Chess.Domain;
 
-namespace Chess.Application.ViewModels
+namespace Chess.Application.Views
 {
     public enum PieceViewType
     {

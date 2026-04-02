@@ -16,11 +16,11 @@ namespace Chess.Application.Models
         // Добавляем состояние сцены для UI
         // UI / игровое состояние
         //public Position Cursor { get; set; } = new Position(0, 0); // позиция курсора
-        public Position? SelectedPosition { get; private set; } // выбранная клетка
-        public List<Position> HighlightedPositions { get; } = new List<Position>(); // возможные ходы для фигуры на выбранной клетке
+        //public Position? SelectedPosition { get; private set; } // выбранная клетка
+        //public List<Position> HighlightedPositions { get; } = new List<Position>(); // возможные ходы для фигуры на выбранной клетке
         
-        private List<Move> _moveHistory = new();
-        public IReadOnlyList<Move> MoveHistory => _moveHistory;
+        //private List<Move> _moveHistory = new();
+        //public IReadOnlyList<Move> MoveHistory => _moveHistory;
 
 
         public GameScene() 
@@ -32,33 +32,33 @@ namespace Chess.Application.Models
             //Cursor = new Position(5, 4);
         }
 
-        public void UpdateMoveHistory(IEnumerable<Move> moves)
-        {
-            _moveHistory.Clear();
-            _moveHistory.AddRange(moves);
-        }
+        //public void UpdateMoveHistory(IEnumerable<Move> moves)
+        //{
+        //    _moveHistory.Clear();
+        //    _moveHistory.AddRange(moves);
+        //}
 
-        private bool HasSelection()
-        {
-            return SelectedPosition != null;
-        }
+        //private bool HasSelection()
+        //{
+        //    return SelectedPosition != null;
+        //}
 
-        public void SetSelection(Position pos)
-        {
-            SelectedPosition = pos;
-        }
-        public void ClearSelection()
-        {
-            SelectedPosition = null;
-        }
-        public void SetHighlights(IEnumerable<Position> positions)
-        {
-            HighlightedPositions.Clear();
-            HighlightedPositions.AddRange(positions);
-        }
-        public void ClearHighlights()
-        {
-            HighlightedPositions.Clear();
-        }
+        //public void SetSelection(Position pos)
+        //{
+        //    SelectedPosition = pos;
+        //}
+        //public void ClearSelection()
+        //{
+        //    SelectedPosition = null;
+        //}
+        //public void SetHighlights(IEnumerable<Position> positions)
+        //{
+        //    HighlightedPositions.Clear();
+        //    HighlightedPositions.AddRange(positions);
+        //}
+        //public void ClearHighlights()
+        //{
+        //    HighlightedPositions.Clear();
+        //}
     }
 }

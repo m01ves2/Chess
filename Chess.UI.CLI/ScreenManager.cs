@@ -14,14 +14,16 @@ namespace Chess.UI.CLI
         public bool IsExitRequested { get; private set; } = false;
         //public bool IsStartGameRequested { get; private set; } = false;
 
-        private GameController _gameController;
+        //private GameController _gameController;
         private readonly IInputHandler _inputHandler;
 
-        public ScreenManager(GameController gameController, IInputHandler inputHandler)
+        public ScreenManager()
         {
             GameSettings = new GameSettings();
-            _gameController = gameController;
-            _inputHandler = inputHandler;
+            //_gameController = new GameController();
+            _inputHandler = new CLIInputHandler();
+
+            SetScreen(new MenuScreen(this/*, _gameController*/));
         }
 
         public void Run()
@@ -72,7 +74,7 @@ namespace Chess.UI.CLI
 
             if (action.Type == PlayerActionType.Escape && !isHandled) {
                 //IsExitRequested = true;
-                SetScreen(new MenuScreen(this, _gameController));
+                SetScreen(new MenuScreen(this/*, _gameController*/));
                 return;
             }
 

@@ -1,9 +1,5 @@
-﻿using Chess.Application;
-using Chess.Application.ViewModels;
-using Chess.Domain;
+﻿using Chess.Application.Views;
 using Chess.UI.CLI.Panels.BasePanels.Rendering;
-using static System.Formats.Asn1.AsnWriter;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Chess.UI.CLI.Panels.BasePanels
 {

@@ -1,5 +1,4 @@
-﻿using Chess.Application;
-using Chess.Application.ViewModels;
+﻿using Chess.Application.Views;
 using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels.BasePanels;
 

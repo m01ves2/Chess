@@ -10,44 +10,23 @@ namespace Chess.Application.Players
         private Position? From;
         private Position? To;
         private PromotionMove? _pendingPromotionMove;
+        public List<Position> Highlights { get; private set; } = new List<Position>();
+        private List<Move> _moves;
+        public Position? SelectedFrom => From;
 
         public HumanPlayer(GameController gameController)
         {
             _gameController = gameController;
         }
 
-        //public Move ChooseMove(GamePosition position, IEnumerable<Move> moves)
-        //{
-        //    while (true) {
-        //        var action = _input.ReadAction();
-
-        //        _screenManager.HandleInput(action);
-
-        //        //var move = _gameController.GetPendingMove();
-
-        //        var move = _gameController.TryGetPendingMove();
-        //        if (move != null && IsValid(move, moves)) {
-        //            return move;
-        //        }
-
-        //        if (_screenManager.IsExitRequested)
-        //            throw new ExitGameException();
-
-        //    }
-        //}
-
-        //private bool IsValid(Move move, IEnumerable<Move> moves)
-        //{
-        //    return moves.Any(m => m.From == move.From && m.To == m.To);
-        //}
         public Move? TryGetMove(List<Move> moves)
         {
-            if (From == null || To == null) 
+            if (From == null || To == null)
                 return null;
 
             var move = moves.FirstOrDefault(m => m.From == From && m.To == To);
 
-            if (move == null) 
+            if (move == null)
                 return null;
 
             if (move is PromotionMove pm) {
@@ -64,22 +43,22 @@ namespace Chess.Application.Players
         {
             Position position = new Position(row, col);
             //TODO Сброс подсветки highlights
+            Highlights.Clear();
+
             //TODO убрать подсветку с клетки From
+            if (From != null && From == position) {
+                From = null;
+                return;
+            }
 
             if (_gameController.GamePosition.CurrentPlayer == _gameController.GamePosition.Board.GetSquare(position).Piece?.Color) {
                 From = position;
                 //TODO установить подсветку на клетку From, установить highlights
                 return;
             }
-            
-            if(From != null && From == position) {
-                From = null;
-                return;
-            }
 
-
-            if(From != null && To == null) {
-                To = position; 
+            if (From != null && To == null) {
+                To = position;
                 return;
             }
 
