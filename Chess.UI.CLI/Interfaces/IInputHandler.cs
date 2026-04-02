@@ -4,6 +4,6 @@ namespace Chess.UI.CLI.Interfaces
 {
     public interface IInputHandler
     {
-        PlayerAction ReadAction();
+        PlayerAction? ReadAction();
     }
 }

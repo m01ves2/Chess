@@ -5,8 +5,11 @@ namespace Chess.UI.CLI
 {
     public class CLIInputHandler : IInputHandler
     {
-        public PlayerAction ReadAction()
+        public PlayerAction? ReadAction()
         {
+            if (!Console.KeyAvailable)
+                return null;
+
             var keyPressed = Console.ReadKey().Key;
             switch (keyPressed) {
                 case ConsoleKey.Spacebar:

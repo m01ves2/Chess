@@ -45,44 +45,43 @@ namespace Chess.Application
             _snapshotHistory.Push(CreateSnapshot());
         }
 
-        public void Select(int row, int col)
-        {
+        //public void Select(int row, int col)
+        //{
 
-            System.Diagnostics.Debug.WriteLine($"Select: Controller ID: {Id}");
+        //    System.Diagnostics.Debug.WriteLine($"Select: Controller ID: {Id}");
 
-            Position position = new Position(row, col);
-            // Сброс подсветки, если новая клетка выбрана
-            var selectedSquare = _gamePosition.Board.GetSquare(position);
-            _gameScene.HighlightedPositions.Clear();
+        //    Position position = new Position(row, col);
+        //    // Сброс подсветки, если новая клетка выбрана
+        //    var selectedSquare = _gamePosition.Board.GetSquare(position);
+        //    _gameScene.HighlightedPositions.Clear();
 
-            if (_gameScene.SelectedPosition == position) {
-                _gameScene.ClearSelection();
-                return;
-            }
+        //    if (_gameScene.SelectedPosition == position) {
+        //        _gameScene.ClearSelection();
+        //        return;
+        //    }
 
-            if (selectedSquare.Piece?.Color == _gamePosition.CurrentPlayer) {
-                var result = SelectPiece(position);
-                _gameScene.SetSelection(result.SelectedPosition!.Value);
-                _gameScene.SetHighlights(result.AvailableMoves);
-                return;
-            }
+        //    if (selectedSquare.Piece?.Color == _gamePosition.CurrentPlayer) {
+        //        var result = SelectPiece(position);
+        //        _gameScene.SetSelection(result.SelectedPosition!.Value);
+        //        _gameScene.SetHighlights(result.AvailableMoves);
+        //        return;
+        //    }
 
-            if (_gameScene.SelectedPosition != null) {
-                TryMakeMove(_gameScene.SelectedPosition.Value, position);
-                _gameScene.ClearSelection();
-            }
-        }
+        //    if (_gameScene.SelectedPosition != null) {
+        //        TryMakeMove(_gameScene.SelectedPosition.Value, position);
+        //        _gameScene.ClearSelection();
+        //    }
+        //}
 
-        private SelectionResult SelectPiece(Position position) //TODO убрать SelectionResult! просто отдавать moves
-        {
-            var moves = _gameEngine.GetLegalMoves(_gamePosition, position).Select(m => m.To).ToList();
-            return new SelectionResult(position, moves);
-        }
+        //private SelectionResult SelectPiece(Position position) //TODO убрать SelectionResult! просто отдавать moves
+        //{
+        //    var moves = _gameEngine.GetLegalMoves(_gamePosition, position).Select(m => m.To).ToList();
+        //    return new SelectionResult(position, moves);
+        //}
 
 
         public void TryMakeMove(Position from, Position to)
         {
-
             System.Diagnostics.Debug.WriteLine($"TryMakeMove: Controller ID: {Id}");
 
             var moves = _gameEngine.GetLegalMoves(_gamePosition, from);

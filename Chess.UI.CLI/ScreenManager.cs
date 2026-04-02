@@ -1,5 +1,6 @@
 ﻿using Chess.Application;
 using Chess.Application.Models;
+using Chess.UI.CLI.Interfaces;
 using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Screens;
 using Chess.UI.CLI.Screens.BaseScreens;
@@ -11,15 +12,41 @@ namespace Chess.UI.CLI
         private BaseScreen _currentScreen;
         public GameSettings GameSettings { get; private set; }
         public bool IsExitRequested { get; private set; } = false;
-        public bool IsStartGameRequested { get; private set; } = false;
+        //public bool IsStartGameRequested { get; private set; } = false;
 
         private GameController _gameController;
+        private readonly IInputHandler _inputHandler;
 
-        public ScreenManager(GameController gameController)
+        public ScreenManager(GameController gameController, IInputHandler inputHandler)
         {
             GameSettings = new GameSettings();
             _gameController = gameController;
+            _inputHandler = inputHandler;
         }
+
+        public void Run()
+        {
+            var frameTime = TimeSpan.FromMilliseconds(16);
+
+            while (!IsExitRequested) {  // ЕДИНСТВЕННЫЙ цикл
+
+            var start = DateTime.Now;
+                
+                Render();                                   // рисует всё: меню, панели, доску
+                var action = _inputHandler.ReadAction();    // читает пользовательский ввод. если играет Ai vs Ai...
+                if (action != null)
+                    HandleInput(action);                        // передаёт ввод текущему экрану
+                
+                _currentScreen.Tick();                      // двигает логику экрана (игру или ничего)
+
+                var elapsed = DateTime.Now - start;
+                var sleep = frameTime - elapsed;
+
+                if (sleep > TimeSpan.Zero)
+                    Thread.Sleep(sleep);
+            }
+        }
+
 
         public void SetScreen(BaseScreen screen)
         {
@@ -38,6 +65,9 @@ namespace Chess.UI.CLI
 
         public void HandleInput(PlayerAction action)
         {
+            //if (action.Type == PlayerActionType.None) 
+            //    return;
+
             var isHandled = _currentScreen.HandleInput(action); //event spreading emulation
 
             if (action.Type == PlayerActionType.Escape && !isHandled) {
@@ -60,9 +90,9 @@ namespace Chess.UI.CLI
             IsExitRequested = true;
         }
 
-        public void RequestStartGame()
-        {
-            IsStartGameRequested = true;
-        }
+        //public void RequestStartGame()
+        //{
+        //    IsStartGameRequested = true;
+        //}
     }
 }

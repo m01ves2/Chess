@@ -31,5 +31,10 @@ namespace Chess.UI.CLI.Screens.BaseScreens
         protected virtual void Init()
         {
         }
+
+        public virtual void Tick()
+        {
+            //To nothing
+        }
     }
 }

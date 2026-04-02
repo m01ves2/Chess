@@ -12,7 +12,6 @@ namespace Chess.UI.CLI.Screens
     {      
         private MenuPanel _menuPanel;
         private MenuView _menuView;
-        private readonly GameSettings _gameSettings;
         private GameController _gameController;
 
         public MenuScreen(ScreenManager manager, GameController gameController) : base(manager) {
@@ -66,8 +65,8 @@ namespace Chess.UI.CLI.Screens
             switch (_menuView.selectedIndex) {
                 case 0:
                     
-                    _manager.SetScreen(new GameScreen(_manager, _gameController));
-                    _manager.RequestStartGame();
+                    _manager.SetScreen(new GameScreen(_manager, _gameController, _manager.GameSettings));
+                    //_manager.RequestStartGame();
                     break;
 
                 case 1:

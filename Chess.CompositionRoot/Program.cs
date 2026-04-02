@@ -9,24 +9,18 @@ namespace Chess.CompositionRoot
     {
         public static void Main(string[] args)
         {
-            //GameScene game = new GameScene();
-            //IBoardRenderer renderer = new CLIBoardRenderer();
-            //IInputHandler inputHandler = new CLIInputHandler();
-
-            //GameController gameController = new GameController();
-            //GameLoop gameLoop = new GameLoop(gameController, renderer, inputHandler);
-            //gameLoop.Run();
-
             if(!InitializeConsole()) {
                 Console.WriteLine("Can't start chess game");
             }
 
             GameController gameController = new GameController();
-            ScreenManager screenManager = new ScreenManager(gameController);
-            screenManager.SetScreen(new MenuScreen(screenManager, gameController));
             IInputHandler inputHandler = new CLIInputHandler();
-            GameLoop gameLoop = new GameLoop(gameController, screenManager, inputHandler);
-            gameLoop.Run();
+            ScreenManager screenManager = new ScreenManager(gameController, inputHandler);
+            screenManager.SetScreen(new MenuScreen(screenManager, gameController));
+            
+            //GameLoop gameLoop = new GameLoop(gameController, screenManager, inputHandler);
+            //gameLoop.Run();
+            screenManager.Run();
         }
 
 

@@ -20,11 +20,11 @@ namespace Chess.UI.CLI.Screens
         private SettingsPanel _settingsPanel;
         private SettingsView _settingsView;
         private int _selectedIndex = 0;
-        public SettingsScreen(ScreenManager manager, GameSettings gameSettings) : base(manager) {
+        public SettingsScreen(ScreenManager manager, GameSettings gameSettings) : base(manager)
+        {
             _gameSettings = gameSettings;
-
             _settingsPanel = new SettingsPanel(0, 0, Console.WindowWidth, Console.WindowHeight);
-            }
+        }
 
 
         public override void Render()

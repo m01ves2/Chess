@@ -29,9 +29,17 @@ namespace Chess.UI.CLI.Screens
         private GameOverPanel _gameOverPanel;
         private GameOverView _gameOverView;
 
-        public GameScreen(ScreenManager manager, GameController gameController) : base(manager)
+        private GameChess _gameChess;
+
+        public GameScreen(ScreenManager manager, GameController gameController, GameSettings gameSettings) : base(manager)
         {
             _gameController = gameController;
+            _gameChess = new GameChess(gameController, gameSettings);
+        }
+
+        public override void Tick()
+        {
+            _gameChess.Tick();
         }
 
         protected override void Init()
@@ -65,7 +73,7 @@ namespace Chess.UI.CLI.Screens
             return promotionView;
         }
 
-        private void RenderGameOveView()
+        private void RenderGameOverView()
         {
             _gameOverView = new GameOverView() { GameOverItems = new List<string>() { "G A M E  O V E R !", " ", $"{_gameController.Winner} side wins!" } };
         }
@@ -97,7 +105,7 @@ namespace Chess.UI.CLI.Screens
             }
 
             if (_gameController.IsGameOver) {
-                RenderGameOveView();
+                RenderGameOverView();
                 _gameOverPanel.Render(_gameOverView);
             }
         }
@@ -129,15 +137,16 @@ namespace Chess.UI.CLI.Screens
                     break;
 
                 case PlayerActionType.Select:
-                    _gameController.Select(_boardPanel.boardCursor.Row, _boardPanel.boardCursor.Col);
+                    //_gameController.Select(_boardPanel.boardCursor.Row, _boardPanel.boardCursor.Col);
+                    _gameChess.Select(_boardPanel.boardCursor.Row, _boardPanel.boardCursor.Col);
                     break;
 
                 case PlayerActionType.Undo:
                     _gameController.UndoMove();
                     break;
-                case PlayerActionType.NewGame:
-                    _manager.SetScreen(new GameScreen(_manager, _gameController));
-                    break;
+                //case PlayerActionType.NewGame:
+                //    _manager.SetScreen(new GameScreen(_manager, _gameController, _game));
+                //    break;
 
                 case PlayerActionType.PageUp:
                     _historyPanel.PageUp();
