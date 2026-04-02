@@ -14,7 +14,9 @@ namespace Chess.CompositionRoot.Players
             if (!moveList.Any())
                 throw new Exception("No moves available"); //TODO GameOver??
 
+            Thread.Sleep(1000);
             return moveList[_random.Next(moveList.Count)];
+
         }
     }
 }

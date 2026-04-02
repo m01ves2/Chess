@@ -20,8 +20,6 @@ namespace Chess.CompositionRoot.Players
         public Move ChooseMove(GamePosition position, IEnumerable<Move> moves)
         {
             while (true) {
-                _screenManager.Render();
-
                 var action = _input.ReadAction();
 
                 _screenManager.HandleInput(action);

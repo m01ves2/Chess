@@ -38,7 +38,7 @@ namespace Chess.CompositionRoot
         public void Run()
         {
             while (/*!_gameController.IsGameOver() ||*/ !_screenManager.IsExitRequested) {
-
+                _screenManager.Render();
                 switch (_gameStatus) {
                     case GameStatus.Navigation:
                         RunNavigationStep();
@@ -54,7 +54,7 @@ namespace Chess.CompositionRoot
 
         private void RunNavigationStep()
         {
-            _screenManager.Render();
+            //_screenManager.Render();
             var action = _inputHandler.ReadAction();
             _screenManager.HandleInput(action);
 
@@ -73,7 +73,9 @@ namespace Chess.CompositionRoot
 
             _screenManager.SetScreen(new GameScreen(_screenManager, _gameController));
 
-            _whitePlayer = new HumanPlayer(_gameController, _screenManager, _inputHandler);
+            //_whitePlayer = new HumanPlayer(_gameController, _screenManager, _inputHandler);
+            //_blackPlayer = new HumanPlayer(_gameController, _screenManager, _inputHandler);
+            _whitePlayer = new AiPlayer(_gameController);
             _blackPlayer = new AiPlayer(_gameController);
 
             _gameStatus = GameStatus.Playing;
