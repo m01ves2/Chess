@@ -98,7 +98,7 @@ namespace Chess.UI.CLI.Screens
             var capturedView = _gameChess.GetCapturedView();
             _capturedPanel.Render(capturedView);
 
-            isPromotion = _gameController.IsPromotionPending;
+            isPromotion = _gameChess.IsPromotionPending;
             if (isPromotion) {
                 var promotionView =  RenderPromotionView();
                 _promotionPanel.Render(promotionView);
@@ -120,33 +120,25 @@ namespace Chess.UI.CLI.Screens
 
             switch (action.Type) {
                 case PlayerActionType.MoveUp:
-                    //_gameController.MoveCursor(-1, 0);
                     _boardPanel.MoveUp();
                     break;
                 case PlayerActionType.MoveDown:
-                    //_gameController.MoveCursor(1, 0);
                     _boardPanel.MoveDown();
                     break;
                 case PlayerActionType.MoveLeft:
-                    //_gameController.MoveCursor(0, -1);
                     _boardPanel.MoveLeft();
                     break;
                 case PlayerActionType.MoveRight:
-                    //_gameController.MoveCursor(0, 1);
                     _boardPanel.MoveRight();
                     break;
 
                 case PlayerActionType.Select:
-                    //_gameController.Select(_boardPanel.boardCursor.Row, _boardPanel.boardCursor.Col);
                     _gameChess.Select(_boardPanel.boardCursor.Row, _boardPanel.boardCursor.Col);
                     break;
 
                 case PlayerActionType.Undo:
                     _gameChess.UndoMove();
                     break;
-                //case PlayerActionType.NewGame:
-                //    _manager.SetScreen(new GameScreen(_manager, _gameController, _game));
-                //    break;
 
                 case PlayerActionType.PageUp:
                     _historyPanel.PageUp();
@@ -171,10 +163,10 @@ namespace Chess.UI.CLI.Screens
                     break;
                 case PlayerActionType.Select:
                     var promotionPiece =  _promotionPanel.Select();
-                    _gameController.CompletePromotion(promotionPiece);
+                    _gameChess.CompletePromotion(promotionPiece);
                     break;
                 case PlayerActionType.Escape:
-                    _gameController.CancelPromotion();
+                    _gameChess.CancelPromotion();
                     return true;
                     
                 default:

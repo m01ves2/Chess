@@ -62,16 +62,16 @@ namespace Chess.Application.Views
                 string mitem = $"#{i + 1}.{NotationMapper.PositionToString(mh.From)} - {NotationMapper.PositionToString(mh.To)}";
 
                 if (mh is NormalMove nm && nm.CapturedPiece != null) {
-                    mitem += GetSymbol(nm.CapturedPiece);
+                    mitem += PieceToChar(nm.CapturedPiece);
                 }
                 else if (mh is EnPassantMove em && em.CapturedPiece != null) {
-                    mitem += GetSymbol(em.CapturedPiece);
+                    mitem += PieceToChar(em.CapturedPiece);
                 }
                 historyViewModel.Moves.Add(mitem);
             }
             return historyViewModel;
         }
-        private static char GetSymbol(Piece piece) => piece switch
+        private static char PieceToChar(Piece piece) => piece switch
         {
             Rook r when r.Color == PieceColor.White => '\u2656',
             Rook r => '\u265C',
@@ -88,27 +88,36 @@ namespace Chess.Application.Views
             _ => '?'
         };
 
-        public static InfoView GetInfoView(PieceColor currentPlayer, bool IsPromotionPending)
+        public static InfoView GetInfoView(PieceColor currentPlayer, bool isCheck,  bool isPromotionPending)
         {
             var infoView = new InfoView()
             {
-                //CurrentPlayer = (_gamePosition.CurrentPlayer == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black),
-                //IsCheck = _gameScene.WhiteKingInCheck || _gameScene.BlackKingInCheck,
-                //IsPromoted = IsPromotionPending,
+                CurrentPlayer = currentPlayer == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black,
+                IsCheck = isCheck,
+                IsPromotionPending = isPromotionPending,
             };
             return infoView;
         }
 
-        //public CapturedView GetCapturedView()
-        //{
-        //    var capturedView = new CapturedView();
-        //    foreach (var captured in _gamePosition.Board.WhiteCaptured) {
-        //        capturedView.WhiteCaptured.Add(MapPieceType(captured));
-        //    }
-        //    foreach (var captured in _gamePosition.Board.BlackCaptured) {
-        //        capturedView.BlackCaptured.Add(MapPieceType(captured));
-        //    }
-        //    return capturedView;
-        //}
+        public static CapturedView GetCapturedView(List<Piece> whiteCaptured, List<Piece> blackCaptured)
+        {
+            var capturedView = new CapturedView();
+            foreach (var captured in whiteCaptured) {
+                capturedView.WhiteCaptured.Add(MapPieceType(captured));
+            }
+            foreach (var captured in blackCaptured) {
+                capturedView.BlackCaptured.Add(MapPieceType(captured));
+            }
+            return capturedView;
+        }
+
+        public static Piece PieceViewTypeToPiece(PieceViewType type, PieceColor color) => type switch
+        {
+            PieceViewType.Queen => new Queen(color),
+            PieceViewType.Rook => new Rook(color),
+            PieceViewType.Knight => new Knight(color),
+            PieceViewType.Bishop => new Bishop(color),
+            _ => new Queen(color),
+        };
     }
 }

@@ -19,7 +19,7 @@ namespace Chess.UI.CLI.Panels
             if (view.IsCheck)
                 AddLine(new LineRender() { Text = $"King in Check!", Style = LineStyle.Selected });
 
-            if (view.IsPromoted)
+            if (view.IsPromotionPending)
                 AddLine(new LineRender() { Text = "Your pawn is being promoted! Choose piece", Style = LineStyle.Selected });
         }
     }

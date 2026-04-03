@@ -5,22 +5,22 @@
         public Board Board { get; }
         public GameState State { get; }
 
-        public PieceColor CurrentPlayer { get; private set; }
+        public PieceColor CurrentPlayerColor { get; private set; }
 
         public GamePosition(Board board, GameState state, PieceColor currentPlayer)
         {
             Board = board;
             State = state;
-            CurrentPlayer = currentPlayer;
+            CurrentPlayerColor = currentPlayer;
         }
 
         public void SwitchTurn()
         {
-            CurrentPlayer = CurrentPlayer == PieceColor.White
+            CurrentPlayerColor = CurrentPlayerColor == PieceColor.White
                 ? PieceColor.Black
                 : PieceColor.White;
         }
-        public GamePosition Clone() => new GamePosition(Board.Clone(), State.Clone(), CurrentPlayer);
+        public GamePosition Clone() => new GamePosition(Board.Clone(), State.Clone(), CurrentPlayerColor);
 
         public IEnumerable<Square> GetSquaresWithPlayerPieces(PieceColor player)
         {

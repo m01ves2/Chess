@@ -1,4 +1,5 @@
-﻿using Chess.Domain;
+﻿using Chess.Application.Views;
+using Chess.Domain;
 using Chess.Domain.Moves;
 using Chess.Domain.Pieces;
 
@@ -10,8 +11,10 @@ namespace Chess.Application.Players
         private Position? From;
         private Position? To;
         private PromotionMove? _pendingPromotionMove;
+        public bool IsPromotionPending => _pendingPromotionMove != null;
+
         public List<Position> Highlights { get; private set; } = new List<Position>();
-        private List<Move> _moves;
+        //private List<Move> _moves;
         public Position? SelectedFrom => From;
 
         public HumanPlayer(GameController gameController)
@@ -24,19 +27,47 @@ namespace Chess.Application.Players
             if (From == null || To == null)
                 return null;
 
-            var move = moves.FirstOrDefault(m => m.From == From && m.To == To);
 
-            if (move == null)
+            Move? move;
+
+            if (_pendingPromotionMove != null) {
+                move = _pendingPromotionMove;
+                _pendingPromotionMove = null;
+            }
+            else {
+                move = moves.FirstOrDefault(m => m.From == From && m.To == To);
+                if (move == null)
+                    return null;
+            }
+
+            if (move is PromotionMove pm && pm.PromotionPiece == null) { //Дополнительные данные для Promotion
+                _pendingPromotionMove = pm;
                 return null;
-
-            if (move is PromotionMove pm) {
-                //TODO - Дополнительные данные для Promotion
-                pm.SetPromotionPiece(new Queen(_gameController.GamePosition.CurrentPlayer)); //TODO заглушка
             }
 
             From = null;
             To = null;
             return move;
+        }
+
+        public void UndoMove()
+        {
+            Highlights.Clear();
+            From = null;
+            To = null;
+        }
+        public void CompletePromotion(PieceViewType type)
+        {
+            if (_pendingPromotionMove == null)
+                return;
+            var piece = Mapper.PieceViewTypeToPiece(type, _gameController.GamePosition.CurrentPlayerColor);
+            _pendingPromotionMove.SetPromotionPiece(piece);
+        }
+
+        public void CancelPromotion()
+        {
+            _pendingPromotionMove = null;
+            From = null;
         }
 
         public void Select(int row, int col)
@@ -51,7 +82,7 @@ namespace Chess.Application.Players
                 return;
             }
 
-            if (_gameController.GamePosition.CurrentPlayer == _gameController.GamePosition.Board.GetSquare(position).Piece?.Color) {
+            if (_gameController.GamePosition.CurrentPlayerColor == _gameController.GamePosition.Board.GetSquare(position).Piece?.Color) {
                 From = position;
                 //TODO установить подсветку на клетку From, установить highlights
                 return;

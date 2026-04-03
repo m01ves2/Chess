@@ -1,5 +1,7 @@
 ﻿using Chess.Application;
 using Chess.Domain;
+using Chess.Domain.Moves;
+using Chess.Domain.Pieces;
 
 namespace Chess.Application.Players
 {
@@ -15,7 +17,11 @@ namespace Chess.Application.Players
         }
         public Move? TryGetMove(List<Move> moves)
         {
-            return moves[_random.Next(moves.Count)];
+            var move = moves[_random.Next(moves.Count)];
+            if (move is PromotionMove pm) {
+                pm.SetPromotionPiece(new Queen(_gameController.GamePosition.CurrentPlayerColor));
+            }
+            return move;
         }
     }
 }

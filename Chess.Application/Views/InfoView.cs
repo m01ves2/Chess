@@ -4,6 +4,6 @@
     {
         public PieceViewColor CurrentPlayer;
         public bool IsCheck;
-        public bool IsPromoted;
+        public bool IsPromotionPending;
     }
 }

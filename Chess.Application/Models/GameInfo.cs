@@ -2,7 +2,7 @@
 
 namespace Chess.Application.Models
 {
-    public class GameScene
+    public class GameInfo
     {
         //public Board Board { get; set; }
         //public PieceColor CurrentPlayer { get; set; }
@@ -23,7 +23,7 @@ namespace Chess.Application.Models
         //public IReadOnlyList<Move> MoveHistory => _moveHistory;
 
 
-        public GameScene() 
+        public GameInfo() 
         {
 
             //PlayerWhite = new Player(PieceColor.White);

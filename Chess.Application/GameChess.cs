@@ -2,6 +2,8 @@
 using Chess.Application.Players;
 using Chess.Application.Views;
 using Chess.Domain;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Chess.Application
 {
@@ -18,6 +20,7 @@ namespace Chess.Application
         private List<Move> _allLegalMovesCache = new List<Move>();
         public PieceViewColor Winner => _controller.Winner == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black;
         public bool IsGameOver => _controller.IsGameOver;
+        public bool IsPromotionPending => (GetCurrentPlayer() is HumanPlayer hp) ? hp.IsPromotionPending : false;
 
         public GameChess(GameSettings gameSettings)
         {
@@ -36,6 +39,8 @@ namespace Chess.Application
 
         public void Tick()
         {
+            System.Diagnostics.Debug.WriteLine($"Promotion: {IsPromotionPending}");
+
             if (GetCurrentPlayer() is AiPlayer) {
                 if (DateTime.Now - _lastMoveTime < _aiDelay)
                     return;
@@ -44,12 +49,14 @@ namespace Chess.Application
             }
 
             if(_allLegalMovesCache.Count == 0)
+            //_allLegalMovesCache.Clear();
                 _allLegalMovesCache.AddRange(_controller.GetAllLegalMoves().ToList());
 
             var moves = _allLegalMovesCache;
 
             if (!moves.Any())
-                throw new Exception("No moves available"); //TODO GameOver??
+                //throw new Exception("No moves available"); //TODO GameOver??
+                return;
 
             var move = GetCurrentPlayer().TryGetMove(moves);
 
@@ -67,9 +74,30 @@ namespace Chess.Application
 
         private IPlayer GetCurrentPlayer()
         {
-            return _controller.GamePosition.CurrentPlayer == PieceColor.White ? _whitePlayer : _blackPlayer;
+            return _controller.GamePosition.CurrentPlayerColor == PieceColor.White ? _whitePlayer : _blackPlayer;
         }
 
+        public void UndoMove()
+        {
+            if (GetCurrentPlayer() is HumanPlayer hp)
+                hp.UndoMove();
+            _controller.UndoMove();
+            _allLegalMovesCache.Clear();
+        }
+
+        public void CompletePromotion(PieceViewType promotionPiece)
+        {
+            if (GetCurrentPlayer() is HumanPlayer hp) {
+                hp.CompletePromotion(promotionPiece);
+            }
+        }
+
+        public void CancelPromotion()
+        {
+            if (GetCurrentPlayer() is HumanPlayer hp) {
+                hp.CancelPromotion();
+            }
+        }
 
         public BoardView GetBoardView()
         {
@@ -81,7 +109,7 @@ namespace Chess.Application
 
             List<Position> highlights = new List<Position>();
             highlights.AddRange(_allLegalMovesCache.Where(m => m.From == selection).Select(m => m.To).ToList());
-            PieceColor currentPlayerColor = _controller.GamePosition.CurrentPlayer;
+            PieceColor currentPlayerColor = _controller.GamePosition.CurrentPlayerColor;
 
             return Mapper.GetBoardView(board, selection, highlights, currentPlayerColor);
         }
@@ -95,42 +123,17 @@ namespace Chess.Application
 
         public InfoView GetInfoView()
         {
-            //return Mapper.GetInfoView();
-            return new InfoView() { };
+            bool isCheck = _controller.GameInfo.BlackKingInCheck || _controller.GameInfo.WhiteKingInCheck;
+            PieceColor currentPlayerColor = _controller.GamePosition.CurrentPlayerColor;
+
+            return Mapper.GetInfoView( currentPlayerColor, isCheck, IsPromotionPending);
         }
 
         public CapturedView GetCapturedView()
         {
-            return new CapturedView() { };
+            List<Piece> whiteCaptured = _controller.GamePosition.Board.WhiteCaptured;
+            List<Piece> blackCaptured = _controller.GamePosition.Board.BlackCaptured;
+            return Mapper.GetCapturedView(whiteCaptured, blackCaptured);
         }
-
-        public void UndoMove()
-        {
-            _controller.UndoMove();
-        }
-        
-
-        //public InfoView GetInfoView()
-        //{
-        //    var infoView = new InfoView()
-        //    {
-        //        CurrentPlayer = (_gamePosition.CurrentPlayer == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black),
-        //        IsCheck = _gameScene.WhiteKingInCheck || _gameScene.BlackKingInCheck,
-        //        IsPromoted = IsPromotionPending,
-        //    };
-        //    return infoView;
-        //}
-
-        //public CapturedView GetCapturedView()
-        //{
-        //    var capturedView = new CapturedView();
-        //    foreach (var captured in _gamePosition.Board.WhiteCaptured) {
-        //        capturedView.WhiteCaptured.Add(MapPieceType(captured));
-        //    }
-        //    foreach (var captured in _gamePosition.Board.BlackCaptured) {
-        //        capturedView.BlackCaptured.Add(MapPieceType(captured));
-        //    }
-        //    return capturedView;
-        //}
     }
 }
