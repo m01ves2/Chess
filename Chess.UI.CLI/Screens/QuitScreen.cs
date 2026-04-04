@@ -14,9 +14,9 @@ namespace Chess.UI.CLI.Screens
             _quitPanel = new QuitPanel(0, 0, Console.WindowWidth, Console.WindowHeight);
             _quitView = new QuitView() { QuitItems = new List<string>() { "Press any key to continue..." } };
         }
-        public override void Render()
+        public override void BuildScreen()
         {
-            _quitPanel.Render(_quitView);
+            _quitPanel.Render(_quitView, _screenBuffer);
         }
 
         public override bool HandleInput(PlayerAction action)

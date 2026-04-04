@@ -5,19 +5,14 @@ namespace Chess.UI.CLI.Panels.BasePanels
     public abstract class GraphicsPanelBase<ViewType> : BasePanel<ViewType>
     {
         protected CellRender[,] _buffer;
-        protected CellRender[,] _prevBuffer;
         public GraphicsPanelBase(int x, int y, int width, int height) : base(x, y, width, height)
         {
             _buffer = new CellRender[InnerHeight, InnerWidth];
-            _prevBuffer = new CellRender[InnerHeight, InnerWidth];
 
             for (int row = 0; row < InnerHeight; row++)
                 for (int col = 0; col < InnerWidth; col++) {
                     _buffer[row, col] = new CellRender();
                     _buffer[row, col].Symbol = ' ';
-
-                    _prevBuffer[row, col] = new CellRender();
-                    _prevBuffer[row, col].Symbol = ' ';
                 }
         }
 
@@ -39,7 +34,7 @@ namespace Chess.UI.CLI.Panels.BasePanels
         //    }
         //}
 
-        public override void Flush()
+        public override void CopyToScreen(CellRender[,] _screenBuffer)
         {
             //var row = new char[InnerWidth];
             //for (int r = 0; r < InnerHeight; r++) {
@@ -66,24 +61,15 @@ namespace Chess.UI.CLI.Panels.BasePanels
             //    }
             //}
 
-            var defaultForeground = Console.ForegroundColor;
-            var defaultBackground = Console.BackgroundColor;
             for (int row = 0; row < InnerHeight; row++) {
                 for (int col = 0; col < InnerWidth; col++) {
                     var current = _buffer[row, col];
-                    var prev = _prevBuffer[row, col];
 
-                    if (!current.Equals(prev)) {
-                        Console.SetCursorPosition(X + 1 + col, Y + 1 + row);
-
-                        Console.ForegroundColor = current.fg;
-                        Console.BackgroundColor = current.bg;
-                        Console.Write(current.Symbol);
+                    if (!current.Equals(_screenBuffer[Y + 1 + row, X + 1 + col ])) {
+                        _screenBuffer[Y + 1 + row, X + 1 + col] = current; //копирование ссылки
                     }
                 }
             }
-            Console.ForegroundColor = defaultForeground;
-            Console.BackgroundColor = defaultBackground;
         }
 
         protected void ClearBuffer()

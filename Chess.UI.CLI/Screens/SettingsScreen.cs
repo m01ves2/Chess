@@ -27,7 +27,7 @@ namespace Chess.UI.CLI.Screens
         }
 
 
-        public override void Render()
+        public override void BuildScreen()
         {
             _settingsView = new SettingsView()
             {
@@ -39,7 +39,7 @@ namespace Chess.UI.CLI.Screens
                 selectedIndex = _selectedIndex,
             };
 
-            _settingsPanel.Render(_settingsView);
+            _settingsPanel.Render(_settingsView, _screenBuffer);
         }
 
         public override bool HandleInput(PlayerAction action)

@@ -5,6 +5,7 @@ using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels;
 using Chess.UI.CLI.Screens.BaseScreens;
 using Chess.UI.CLI.Views;
+using System.Xml.Linq;
 
 namespace Chess.UI.CLI.Screens
 {
@@ -75,10 +76,10 @@ namespace Chess.UI.CLI.Screens
 
         private void RenderGameOverView()
         {
-            _gameOverView = new GameOverView() { GameOverItems = new List<string>() { "G A M E  O V E R !", " ", $"{_gameChess.Winner} side wins!" } };
+            _gameOverView = new GameOverView() { GameOverItems = new List<string>() { "G A M E  O V E R !", " ", $"It's {_gameChess.Result}!",  $"{_gameChess.Winner} side wins!" } };
         }
 
-        public override void Render()
+        public override void BuildScreen()
         {
             ConsoleResize();
 
@@ -87,26 +88,26 @@ namespace Chess.UI.CLI.Screens
 
             var boardView = _gameChess.GetBoardView();
             isBoardFlipped = (_manager.GameSettings.BlackPlayer == PlayerType.Human && boardView.currentPlayer == PieceViewColor.Black);
-            _boardPanel.Render(new BoardDisplayView() { BoardView = boardView, IsBoardFlipped = isBoardFlipped });
+            _boardPanel.Render(new BoardDisplayView() { BoardView = boardView, IsBoardFlipped = isBoardFlipped }, _screenBuffer);
 
             var historyView = _gameChess.GetHistoryView();
-            _historyPanel.Render(historyView);
+            _historyPanel.Render(historyView, _screenBuffer);
 
             var infoView = _gameChess.GetInfoView();
-            _infoPanel.Render(infoView);
+            _infoPanel.Render(infoView, _screenBuffer);
 
             var capturedView = _gameChess.GetCapturedView();
-            _capturedPanel.Render(capturedView);
+            _capturedPanel.Render(capturedView, _screenBuffer );
 
             isPromotion = _gameChess.IsPromotionPending;
             if (isPromotion) {
                 var promotionView =  RenderPromotionView();
-                _promotionPanel.Render(promotionView);
+                _promotionPanel.Render(promotionView, _screenBuffer);
             }
 
             if (_gameChess.IsGameOver) {
                 RenderGameOverView();
-                _gameOverPanel.Render(_gameOverView);
+                _gameOverPanel.Render(_gameOverView, _screenBuffer);
             }
         }
 

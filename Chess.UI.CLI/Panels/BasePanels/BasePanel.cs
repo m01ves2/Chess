@@ -25,15 +25,15 @@ namespace Chess.UI.CLI.Panels.BasePanels
             ClearPanel(); //очистка пространства для новорождённой панели
         }
 
-        public void Render(ViewType view)
+        public void Render(ViewType view, CellRender[,] _screenBuffer)
         {
             DrawBorder();
             BuildBuffer(view);      // заполняем _buffer
-            Flush();            // выводим только изменения
+            CopyToScreen(_screenBuffer);            // выводим только изменения
         }
 
         public abstract void BuildBuffer(ViewType view); //_buffer
-        public abstract void Flush();
+        public abstract void CopyToScreen(CellRender[,] _screenBuffer);
         protected void DrawBorder()
         {
             // верх

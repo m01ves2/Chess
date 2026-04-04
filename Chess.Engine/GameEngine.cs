@@ -318,6 +318,11 @@ namespace Chess.Engine
             return IsKingInCheck(gamePosition, player) && !HasAnyLegalMoves(gamePosition, player);
         }
 
+        public bool IsStalemate(GamePosition gamePosition, PieceColor player)
+        {
+            return !HasAnyLegalMoves(gamePosition, player);
+        }
+
         private bool HasAnyLegalMoves(GamePosition gamePosition, PieceColor player)
         {
             foreach (var square in gamePosition.GetSquaresWithPlayerPieces(player)) {

@@ -20,9 +20,9 @@ namespace Chess.UI.CLI.Screens
             _menuView = new MenuView() { MenuItems = new List<string>() { "1. New Game", "2. Settings", "3. Quit" }, selectedIndex = 0 };
         }
 
-        public override void Render()
+        public override void BuildScreen()
         {
-            _menuPanel.Render(_menuView);
+            _menuPanel.Render(_menuView, _screenBuffer);
         }
 
         public override bool HandleInput(PlayerAction action)

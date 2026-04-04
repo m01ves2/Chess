@@ -1,5 +1,4 @@
-﻿using Chess.Application;
-using Chess.Domain;
+﻿using Chess.Domain;
 using Chess.Domain.Moves;
 using Chess.Domain.Pieces;
 

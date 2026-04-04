@@ -4,6 +4,12 @@ using Chess.Engine;
 
 namespace Chess.Application
 {
+    public enum GameResult
+    {
+        None,
+        Checkmate,
+        Stalemate,
+    }
 
     public class GameController
     {
@@ -23,8 +29,9 @@ namespace Chess.Application
 
         private bool _isGameOver = false;
         public bool IsGameOver => _isGameOver;
-        public PieceColor Winner { get; private set; }
+        public PieceColor? Winner { get; private set; }
 
+        public GameResult Result { get; private set; } = GameResult.None;
 
         public GameController()
         {
@@ -50,10 +57,22 @@ namespace Chess.Application
             SwitchPlayer();
             UpdateGameInfo();
 
-            if (_gameEngine.IsCheckmate(_gamePosition, _gamePosition.CurrentPlayerColor )) {
-                //_gameState = GameStatus.GameOver;
+            //if (_gameEngine.IsCheckmate(_gamePosition, _gamePosition.CurrentPlayerColor )) {
+            //    //_gameState = GameStatus.GameOver;
+            //    _isGameOver = true;
+            //    Winner = _gamePosition.CurrentPlayerColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+            //}
+            if (_gameEngine.IsCheckmate(_gamePosition, _gamePosition.CurrentPlayerColor)) {
                 _isGameOver = true;
-                Winner = _gamePosition.CurrentPlayerColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+                Winner = _gamePosition.CurrentPlayerColor == PieceColor.White
+                    ? PieceColor.Black
+                    : PieceColor.White;
+                Result = GameResult.Checkmate;
+            }
+            else if (_gameEngine.IsStalemate(_gamePosition, _gamePosition.CurrentPlayerColor)) {
+                _isGameOver = true;
+                Winner = null; // ничья
+                Result = GameResult.Stalemate;
             }
         }
 

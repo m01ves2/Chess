@@ -2,8 +2,6 @@
 using Chess.Application.Players;
 using Chess.Application.Views;
 using Chess.Domain;
-using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Chess.Application
 {
@@ -19,8 +17,10 @@ namespace Chess.Application
 
         private List<Move> _allLegalMovesCache = new List<Move>();
         public PieceViewColor Winner => _controller.Winner == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black;
-        public bool IsGameOver => _controller.IsGameOver;
+        //public bool IsGameOver => _controller.IsGameOver;
         public bool IsPromotionPending => (GetCurrentPlayer() is HumanPlayer hp) ? hp.IsPromotionPending : false;
+        public GameResult Result => _controller.Result;
+        public bool IsGameOver => _controller.IsGameOver;
 
         public GameChess(GameSettings gameSettings)
         {
@@ -39,26 +39,34 @@ namespace Chess.Application
 
         public void Tick()
         {
-            System.Diagnostics.Debug.WriteLine($"Promotion: {IsPromotionPending}");
-
-            if (GetCurrentPlayer() is AiPlayer) {
-                if (DateTime.Now - _lastMoveTime < _aiDelay)
-                    return;
-
-                _lastMoveTime = DateTime.Now;
-            }
-
-            if(_allLegalMovesCache.Count == 0)
-            //_allLegalMovesCache.Clear();
-                _allLegalMovesCache.AddRange(_controller.GetAllLegalMoves().ToList());
-
-            var moves = _allLegalMovesCache;
-
-            if (!moves.Any())
-                //throw new Exception("No moves available"); //TODO GameOver??
+            if (_controller.IsGameOver)
                 return;
 
-            var move = GetCurrentPlayer().TryGetMove(moves);
+            if (GetCurrentPlayer() is AiPlayer ai) {
+                if (_allLegalMovesCache.Count == 0)
+                    _allLegalMovesCache.AddRange(_controller.GetAllLegalMoves());
+
+                var move = GetCurrentPlayer().TryGetMove(_allLegalMovesCache);
+
+                if (move != null) {
+                    _controller.DoMove(move);
+                    _allLegalMovesCache.Clear();
+                }
+            }
+        }
+
+        public void Select(int row, int col)
+        {
+            if (_controller.IsGameOver)
+                return;
+
+            if (GetCurrentPlayer() is not HumanPlayer hp)
+                return;
+
+            if (_allLegalMovesCache.Count == 0)
+                _allLegalMovesCache.AddRange(_controller.GetAllLegalMoves().ToList());
+
+            var move = hp.Select(new Position(row, col), _allLegalMovesCache);
 
             if (move != null) {
                 _controller.DoMove(move);
@@ -66,11 +74,6 @@ namespace Chess.Application
             }
         }
 
-        public void Select(int row, int col)
-        {
-            if(GetCurrentPlayer() is HumanPlayer hp)
-                hp.Select(row, col);
-        }
 
         private IPlayer GetCurrentPlayer()
         {
@@ -88,7 +91,12 @@ namespace Chess.Application
         public void CompletePromotion(PieceViewType promotionPiece)
         {
             if (GetCurrentPlayer() is HumanPlayer hp) {
-                hp.CompletePromotion(promotionPiece);
+                var move = hp.CompletePromotion(promotionPiece);
+
+                if (move != null) {
+                    _controller.DoMove(move);
+                    _allLegalMovesCache.Clear();
+                }
             }
         }
 
