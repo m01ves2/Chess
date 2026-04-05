@@ -10,7 +10,7 @@ namespace Chess.UI.CLI
             if (!Console.KeyAvailable)
                 return null;
 
-            var keyPressed = Console.ReadKey().Key;
+            var keyPressed = Console.ReadKey(intercept: true).Key;
             switch (keyPressed) {
                 case ConsoleKey.Spacebar:
                     return new PlayerAction(PlayerActionType.Select);

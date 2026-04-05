@@ -5,47 +5,28 @@ using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels;
 using Chess.UI.CLI.Screens.BaseScreens;
 using Chess.UI.CLI.Views;
-using System.Xml.Linq;
 
 namespace Chess.UI.CLI.Screens
 {
     public class GameScreen : BaseScreen
     {
-        //private readonly GameController _gameController;
+        private GameChess _gameChess;
 
         private BoardPanel _boardPanel;
         bool isBoardFlipped = false;
 
         private HistoryPanel _historyPanel;
-        
         private InfoPanel _infoPanel;
-        
-        private CapturedPanel _capturedPanel;
-
-        
+        private CapturedPanel _capturedPanel;       
         private PromotionPanel _promotionPanel;
-        //private BoardView _promotionView;
-        private bool isPromotion = true;
-        
         private GameOverPanel _gameOverPanel;
-        private GameOverView _gameOverView;
+        private bool _isPromotion = false;
+        private bool _isGameOver = false;
 
-        private GameChess _gameChess;
 
-        public GameScreen(ScreenManager manager, /*GameController gameController,*/ GameSettings gameSettings) : base(manager)
+        public GameScreen(ScreenManager manager, GameSettings gameSettings) : base(manager)
         {
-            //_gameController = gameController;
             _gameChess = new GameChess(/*gameController, */gameSettings);
-        }
-
-        public override void Tick()
-        {
-            _gameChess.Tick();
-        }
-
-        protected override void Init()
-        {
-            Console.Clear();
 
             int leftPanelWidth = 30;
             int rightPanelWidth = Console.WindowWidth - leftPanelWidth;
@@ -56,11 +37,51 @@ namespace Chess.UI.CLI.Screens
             _capturedPanel = new CapturedPanel(0, boardPanelHeight, leftPanelWidth, Console.WindowHeight - boardPanelHeight);
             _infoPanel = new InfoPanel(leftPanelWidth, 0, rightPanelWidth, infoPanelHeight);
             _historyPanel = new HistoryPanel(leftPanelWidth, infoPanelHeight, rightPanelWidth, Console.WindowHeight - infoPanelHeight);
-
             _promotionPanel = new PromotionPanel(8, 12, 14, 5);
-            _gameOverPanel = new GameOverPanel(5, 12, 20, 6 );
+            _gameOverPanel = new GameOverPanel(5, 12, 20, 6);
 
+            BuildPanels();
         }
+
+        protected void BuildPanels()
+        {
+            _panels.Clear();
+
+            // сначала базовые панели
+            _panels.Add(_boardPanel);
+            _panels.Add(_capturedPanel);
+            _panels.Add(_infoPanel);
+            _panels.Add(_historyPanel);
+
+            // только если активна — overlay
+            if (_isPromotion)
+                _panels.Add(_promotionPanel);
+            if(_isGameOver)
+                _panels.Add(_gameOverPanel);
+        }
+
+
+        public override void Tick()
+        {
+            _gameChess.Tick();
+        }
+
+        //protected override void Init()
+        //{
+        //    //Console.Clear();
+
+        //    int leftPanelWidth = 30;
+        //    int rightPanelWidth = Console.WindowWidth - leftPanelWidth;
+        //    int boardPanelHeight = 30;
+        //    int infoPanelHeight = 6;
+
+        //    _boardPanel = new BoardPanel(0, 0, leftPanelWidth, boardPanelHeight);
+        //    _capturedPanel = new CapturedPanel(0, boardPanelHeight, leftPanelWidth, Console.WindowHeight - boardPanelHeight);
+        //    _infoPanel = new InfoPanel(leftPanelWidth, 0, rightPanelWidth, infoPanelHeight);
+        //    _historyPanel = new HistoryPanel(leftPanelWidth, infoPanelHeight, rightPanelWidth, Console.WindowHeight - infoPanelHeight);
+        //    _promotionPanel = new PromotionPanel(8, 12, 14, 5);
+        //    _gameOverPanel = new GameOverPanel(5, 12, 20, 6 );
+        //}
 
         private BoardView RenderPromotionView()
         {
@@ -72,50 +93,66 @@ namespace Chess.UI.CLI.Screens
             promotionView.Cells[0, 3] = new CellView() { PieceView = new PieceView() { Color = PieceViewColor.Black, Type = PieceViewType.Knight } };
             //_promotionView.Cells[promotionCursor.Row, promotionCursor.Col].IsCursor = true;
             return promotionView;
-        }
-
-        private void RenderGameOverView()
+        }//TODO
+        private GameOverView RenderGameOverView()
         {
-            _gameOverView = new GameOverView() { GameOverItems = new List<string>() { "G A M E  O V E R !", " ", $"It's {_gameChess.Result}!",  $"{_gameChess.Winner} side wins!" } };
-        }
+            return new GameOverView() { GameOverItems = new List<string>() { "G A M E  O V E R !", " ", $"It's {_gameChess.Result}!",  $"{_gameChess.Winner} side wins!" } };
+        }//TODO
 
         public override void BuildScreen()
         {
-            ConsoleResize();
-
-            //bool rotate = _mode == GameMode.HumanVsHuman
-            //        && _controller.CurrentPlayer == PieceColor.Black;
+            if (CheckPromotionChanged()) {
+                BuildPanels();
+            }
+            if(CheckGameOverChanged()) {
+                BuildPanels();
+            }
 
             var boardView = _gameChess.GetBoardView();
             isBoardFlipped = (_manager.GameSettings.BlackPlayer == PlayerType.Human && boardView.currentPlayer == PieceViewColor.Black);
-            _boardPanel.Render(new BoardDisplayView() { BoardView = boardView, IsBoardFlipped = isBoardFlipped }, _screenBuffer);
+            var boardDisplayView = new BoardDisplayView() { BoardView = boardView, IsBoardFlipped = isBoardFlipped };
+            _boardPanel.SetView(boardDisplayView);
 
             var historyView = _gameChess.GetHistoryView();
-            _historyPanel.Render(historyView, _screenBuffer);
+            _historyPanel.SetView(historyView);
 
             var infoView = _gameChess.GetInfoView();
-            _infoPanel.Render(infoView, _screenBuffer);
+            _infoPanel.SetView(infoView);
 
             var capturedView = _gameChess.GetCapturedView();
-            _capturedPanel.Render(capturedView, _screenBuffer );
+            _capturedPanel.SetView(capturedView );
 
-            isPromotion = _gameChess.IsPromotionPending;
-            if (isPromotion) {
-                var promotionView =  RenderPromotionView();
-                _promotionPanel.Render(promotionView, _screenBuffer);
-            }
 
-            if (_gameChess.IsGameOver) {
-                RenderGameOverView();
-                _gameOverPanel.Render(_gameOverView, _screenBuffer);
+             var promotionView =  RenderPromotionView();
+            _promotionPanel.SetView(promotionView);
+
+             var gameOverView = RenderGameOverView();
+            _gameOverPanel.SetView(gameOverView);
+        }
+
+        public bool CheckPromotionChanged()
+        {
+            if(_isPromotion != _gameChess.IsPromotionPending) {
+                _isPromotion = _gameChess.IsPromotionPending;
+                return true;
             }
+            return false;
+        }
+
+        public bool CheckGameOverChanged()
+        {
+            if(_isGameOver != _gameChess.IsGameOver) {
+                _isGameOver = _gameChess.IsGameOver;
+                return true;
+            }
+            return false;
         }
 
         public override bool HandleInput(PlayerAction action)
         {
             if (action == null) return false;
 
-            if (isPromotion) {
+            if (_isPromotion) {
                 return HandlePromotion(action);
             }
 

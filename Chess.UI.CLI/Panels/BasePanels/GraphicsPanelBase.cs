@@ -16,67 +16,29 @@ namespace Chess.UI.CLI.Panels.BasePanels
                 }
         }
 
-        //protected void SetChar(int x, int y, char ch)
-        //{
-        //    if (x < 0 || x >= InnerWidth || y < 0 || y >= InnerHeight)
-        //        return;
-
-        //    _buffer[y, x] = ch;
-        //}
-
-        //protected void WriteString(int x, int y, string text)
-        //{
-        //    for (int i = 0; i < text.Length; i++) {
-        //        int col = x + i;
-        //        if (col >= Width) break;
-
-        //        _buffer[y, col] = text[i];
-        //    }
-        //}
-
         public override void CopyToScreen(CellRender[,] _screenBuffer)
         {
-            //var row = new char[InnerWidth];
-            //for (int r = 0; r < InnerHeight; r++) {
-            //    bool changed = false;
-
-            //    for (int c = 0; c < InnerWidth; c++) {
-            //        if (_buffer[r, c] != _prevBuffer[r, c]) {
-            //            changed = true;
-            //            break;
-            //        }
-            //    }
-
-            //    if (changed) {
-            //        // собираем строку
-            //        for (int c = 0; c < InnerWidth; c++) {
-            //            row[c] = _buffer[r, c].Symbol;
-            //            _prevBuffer[r, c].Symbol = _buffer[r, c].Symbol;
-            //            _prevBuffer[r, c].fg = _buffer[r, c].fg;
-            //            _prevBuffer[r, c].bg = _buffer[r, c].bg;
-            //        }
-
-            //        Console.SetCursorPosition(InnerX, InnerY + r);
-            //        Console.Write(row);
-            //    }
-            //}
-
             for (int row = 0; row < InnerHeight; row++) {
                 for (int col = 0; col < InnerWidth; col++) {
                     var current = _buffer[row, col];
 
-                    if (!current.Equals(_screenBuffer[Y + 1 + row, X + 1 + col ])) {
-                        _screenBuffer[Y + 1 + row, X + 1 + col] = current; //копирование ссылки
+                    if (_screenBuffer[Y + 1 + row, X + 1 + col] != current) {
+                        _screenBuffer[Y + 1 + row, X + 1 + col].Symbol = current.Symbol;
+                        _screenBuffer[Y + 1 + row, X + 1 + col].fg = current.fg;
+                        _screenBuffer[Y + 1 + row, X + 1 + col].bg = current.bg;
                     }
                 }
             }
         }
 
-        protected void ClearBuffer()
+        public override void ClearBuffer()
         {
             for (int r = 0; r < InnerHeight; r++)
-                for (int c = 0; c < InnerWidth; c++)
+                for (int c = 0; c < InnerWidth; c++) {
                     _buffer[r, c].Symbol = ' ';
+                    _buffer[r, c].fg = Console.ForegroundColor;
+                    _buffer[r, c].bg = Console.BackgroundColor;
+                }
         }
     }
 }

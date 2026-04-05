@@ -12,7 +12,7 @@ namespace Chess.UI.CLI.Panels
 
         public override void BuildBuffer(InfoView view)
         {
-            ClearLines();
+            ClearBuffer();
 
             AddLine(new LineRender() { Text = $"{view.CurrentPlayer} turn", Style = LineStyle.None });
 

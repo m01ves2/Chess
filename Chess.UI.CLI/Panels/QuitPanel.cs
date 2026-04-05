@@ -12,7 +12,7 @@ namespace Chess.UI.CLI.Panels
 
         public override void BuildBuffer(QuitView view)
         {
-            ClearLines();
+            ClearBuffer();
             //TODO show game statistics
             view.QuitItems.ForEach(item => AddLine(new LineRender() { Text = item, Style = LineStyle.None })); 
         }

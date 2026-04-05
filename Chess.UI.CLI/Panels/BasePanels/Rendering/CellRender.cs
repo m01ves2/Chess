@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace Chess.UI.CLI.Panels.BasePanels.Rendering
 {
-    public class CellRender
+    public struct CellRender
     {
         public char Symbol { get; set; }
         public ConsoleColor fg { get; set; }
@@ -19,6 +19,11 @@ namespace Chess.UI.CLI.Panels.BasePanels.Rendering
         public static bool operator!=(CellRender left, CellRender right)
         {
             return !(left == right);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

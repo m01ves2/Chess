@@ -1,14 +1,13 @@
-﻿using Chess.Application;
-using Chess.UI.CLI.Models;
+﻿using Chess.UI.CLI.Models;
+using Chess.UI.CLI.Panels.BasePanels;
 using Chess.UI.CLI.Panels.BasePanels.Rendering;
-using System;
 
 namespace Chess.UI.CLI.Screens.BaseScreens
 {
     public abstract class BaseScreen
     {
-        protected const int MinWidth = 80;
-        protected const int MinHeight = 40;
+        protected const int Width = 80;
+        protected const int Height = 40;
         protected CellRender[,] _screenBuffer;
         protected CellRender[,] _prevScreenBuffer;
 
@@ -16,35 +15,58 @@ namespace Chess.UI.CLI.Screens.BaseScreens
         private int ConsoleWidth = Console.WindowWidth;
         private int ConsoleHeight = Console.WindowHeight;
 
+        // все панели экрана
+        protected List<IPanel> _panels = new();
+
         public BaseScreen(ScreenManager manager)
         {
             _manager = manager;
 
-            _screenBuffer = new CellRender[MinHeight, MinWidth];
-            _prevScreenBuffer = new CellRender[MinHeight, MinWidth];
+            _screenBuffer = new CellRender[Height, Width];
+            _prevScreenBuffer = new CellRender[Height, Width];
 
-            for (int row = 0; row < MinHeight; row++)
-                for (int col = 0; col < MinWidth; col++) {
+            for (int row = 0; row < Height; row++)
+                for (int col = 0; col < Width; col++) {
                     _screenBuffer[row, col] = new CellRender();
                     _screenBuffer[row, col].Symbol = ' ';
+                    //_screenBuffer[row, col].fg = Console.ForegroundColor;
+                    //_screenBuffer[row, col].bg = Console.BackgroundColor;
 
                     _prevScreenBuffer[row, col] = new CellRender();
                     _prevScreenBuffer[row, col].Symbol = ' ';
+                    //_prevScreenBuffer[row, col].bg = Console.BackgroundColor;
+                    //_prevScreenBuffer[row, col].fg = Console.ForegroundColor;
                 }
 
-            Init();
+            //Init();
         }
 
         public void Render()
         {
-            //Console.Clear();
+            Clear();
             BuildScreen();
+            CopyToScreen();
             Flush();
         }
 
+        public void Clear()
+        {
+            for (int row = 0; row < Height; row++)
+                for (int col = 0; col < Width; col++) {
+                    _screenBuffer[row, col].Symbol = ' ';
+                    _screenBuffer[row, col].bg = Console.BackgroundColor;
+                    _screenBuffer[row, col].fg = Console.ForegroundColor;
+                }
+        }
         public abstract void BuildScreen();
-        public abstract bool HandleInput(PlayerAction action);
-
+        public void CopyToScreen()
+        {
+            foreach (var panel in _panels) {
+                panel.Render();
+                panel.DrawBorder(_screenBuffer);
+                panel.CopyToScreen(_screenBuffer);
+            }
+        }
 
         //public void Flush()
         //{
@@ -118,50 +140,43 @@ namespace Chess.UI.CLI.Screens.BaseScreens
         //        }
         //    }
         //}
-
         public void Flush()
         {
-            var defaultbg = Console.BackgroundColor;
-            var defaultfg = Console.ForegroundColor;
-            for (int row = 0; row < MinHeight; row++) {
-                for (int col = 0; col < MinWidth; col++) {
-                    if (_prevScreenBuffer[row, col] != _screenBuffer[row, col]) {
-                        Console.SetCursorPosition(col, row);
-                        Console.ForegroundColor = _screenBuffer[row, col].fg;
-                        Console.BackgroundColor = _screenBuffer[row, col].bg;
-                        Console.Write(_screenBuffer[row, col].Symbol);
+            var defaultForeground = Console.ForegroundColor;
+            var defaultBackground = Console.BackgroundColor;
+            Console.SetCursorPosition(0, 0); // всегда в верхний левый угол
+            for (int row = 0; row < Height; row++) {
+                for (int col = 0; col < Width; col++) {
+                    var current = _screenBuffer[row, col];
+                    var previous = _prevScreenBuffer[row, col];
 
-                        _prevScreenBuffer[row, col].Symbol = _screenBuffer[row, col].Symbol;
-                        _prevScreenBuffer[row, col].fg = _screenBuffer[row, col].fg;
-                        _prevScreenBuffer[row, col].bg = _screenBuffer[row, col].bg;
+                    if (current != previous) {
+                        Console.SetCursorPosition(col, row);
+                        Console.ForegroundColor = current.fg;
+                        Console.BackgroundColor = current.bg;
+                        Console.Write(current.Symbol);
+
+                        // Копируем значение в prev
+                        _prevScreenBuffer[row, col] = current;
                     }
                 }
             }
-            Console.BackgroundColor = defaultbg;
-            Console.ForegroundColor = defaultfg;
-            ClearScreenBuffer();
+
+            Console.ForegroundColor = defaultForeground;
+            Console.BackgroundColor = defaultBackground;
         }
 
-        public void ClearScreenBuffer()
-        {
-            for (int row = 0; row < MinHeight; row++)
-                for (int col = 0; col < MinWidth; col++) {
-                    _screenBuffer[row, col].Symbol = ' ';
-                    _screenBuffer[row, col].bg = Console.BackgroundColor;
-                    _screenBuffer[row, col].fg = Console.BackgroundColor;
-                }
-        }
+        public abstract bool HandleInput(PlayerAction action);
 
+        //public void ConsoleResize()
+        //{
+        //    if (Console.WindowHeight != ConsoleHeight || Console.WindowWidth != ConsoleWidth)
+        //        Init();
+        //}
 
-        public void ConsoleResize()
-        {
-            if (Console.WindowHeight != ConsoleHeight || Console.WindowWidth != ConsoleWidth)
-                Init();
-        }
-
-        protected virtual void Init()
-        {
-        }
+        //protected virtual void Init()
+        //{
+        //}
 
         public virtual void Tick()
         {

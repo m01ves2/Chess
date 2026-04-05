@@ -19,27 +19,30 @@ namespace Chess.UI.CLI.Screens
         private readonly GameSettings _gameSettings;
         private SettingsPanel _settingsPanel;
         private SettingsView _settingsView;
-        private int _selectedIndex = 0;
         public SettingsScreen(ScreenManager manager, GameSettings gameSettings) : base(manager)
         {
             _gameSettings = gameSettings;
+            _settingsView = new SettingsView()
+            {
+                AiDifficulty    = _gameSettings.AiDifficulty,
+                PlayerTypeBlack = _gameSettings.BlackPlayer,
+                PlayerTypeWhite = _gameSettings.WhitePlayer,
+                selectedIndex = 0,   
+            };
             _settingsPanel = new SettingsPanel(0, 0, Console.WindowWidth, Console.WindowHeight);
+            _settingsPanel.SetView(_settingsView);
+            BuildPanels();
         }
 
+        protected void BuildPanels()
+        {
+            _panels.Clear();
+            _panels.Add(_settingsPanel);
+        }
 
         public override void BuildScreen()
         {
-            _settingsView = new SettingsView()
-            {
-                SettingsItems = new List<string>() {
-                    "1. Player White: " + _gameSettings.WhitePlayer,
-                    "2. Player Black: " + _gameSettings.BlackPlayer,
-                    "3. Ai level: " + _gameSettings.AiDifficulty
-                },
-                selectedIndex = _selectedIndex,
-            };
-
-            _settingsPanel.Render(_settingsView, _screenBuffer);
+            //_settingsPanel.SetView(_settingsView);
         }
 
         public override bool HandleInput(PlayerAction action)
@@ -64,21 +67,21 @@ namespace Chess.UI.CLI.Screens
 
         public void MoveDown()
         {
-            _selectedIndex++;
-            if (_selectedIndex > _settingsView.SettingsItems.Count - 1)
-                _selectedIndex = _settingsView.SettingsItems.Count - 1;
+            _settingsView.selectedIndex++;
+            if (_settingsView.selectedIndex > 2)
+                _settingsView.selectedIndex = 2;
         }
 
         public void MoveUp()
         {
-            _selectedIndex--;
+            _settingsView.selectedIndex--;
             if (_settingsView.selectedIndex < 0)
                 _settingsView.selectedIndex = 0;
         }
 
         private void HandleSelection()
         {
-            switch (_selectedIndex) {
+            switch (_settingsView.selectedIndex) {
                 case 0:
                     TogglePlayerWhiteSetting();
                     break;
@@ -99,6 +102,8 @@ namespace Chess.UI.CLI.Screens
                 _gameSettings.WhitePlayer = PlayerType.Ai;
             else
                 _gameSettings.WhitePlayer = PlayerType.Human;
+
+            _settingsView.PlayerTypeWhite = _gameSettings.WhitePlayer;
         }
 
         public void TogglePlayerBlackSetting()
@@ -107,11 +112,14 @@ namespace Chess.UI.CLI.Screens
                 _gameSettings.BlackPlayer = PlayerType.Ai;
             else
                 _gameSettings.BlackPlayer = PlayerType.Human;
+
+            _settingsView.PlayerTypeBlack = _gameSettings.BlackPlayer;
         }
 
         public void ToggleAiDifficultySetting()
         {
             _gameSettings.AiDifficulty = _gameSettings.AiDifficulty % 3 + 1;
+            _settingsView.AiDifficulty = _gameSettings.AiDifficulty;
         }
     }
 }

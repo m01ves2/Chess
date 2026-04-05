@@ -14,7 +14,7 @@ namespace Chess.UI.CLI.Panels
 
         public override void BuildBuffer(MenuView view)
         {
-            ClearLines();
+            ClearBuffer();
 
             for(int i = 0; i < view.MenuItems.Count; i++) {
                 var menuItem = view.MenuItems[i];

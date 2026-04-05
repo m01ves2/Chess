@@ -19,7 +19,7 @@ namespace Chess.UI.CLI.Panels
 
         public override void BuildBuffer(MoveHistoryView view)
         {
-            ClearLines();
+            ClearBuffer();
             var scrolledHistory = view.Moves.Skip(skip).Take(take).ToList();
             canScrollDown = scrolledHistory.Count > 0 && view.Moves.Count > InnerHeight - 2;
 

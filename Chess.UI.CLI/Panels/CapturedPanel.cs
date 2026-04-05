@@ -12,7 +12,7 @@ namespace Chess.UI.CLI.Panels
 
         public override void BuildBuffer(CapturedView view)
         {
-            ClearLines();
+            ClearBuffer();
 
             AddLine(new LineRender() { Text = "Pieces captured:", Style = LineStyle.Selected });
             var whiteCapturedMessage = "";

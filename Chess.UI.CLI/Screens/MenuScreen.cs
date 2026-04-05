@@ -1,6 +1,4 @@
-﻿using Chess.Application;
-using Chess.Application.Models;
-using Chess.UI.CLI.Models;
+﻿using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels;
 using Chess.UI.CLI.Screens.BaseScreens;
 using Chess.UI.CLI.Views;
@@ -12,17 +10,25 @@ namespace Chess.UI.CLI.Screens
     {      
         private MenuPanel _menuPanel;
         private MenuView _menuView;
-        private GameController _gameController;
 
-        public MenuScreen(ScreenManager manager/*, GameController gameController*/) : base(manager) {
-            //_gameController = gameController;
-            _menuPanel = new MenuPanel(0, 0, Console.WindowWidth, Console.WindowHeight);
+        public MenuScreen(ScreenManager manager) : base(manager) {
             _menuView = new MenuView() { MenuItems = new List<string>() { "1. New Game", "2. Settings", "3. Quit" }, selectedIndex = 0 };
+            _menuPanel = new MenuPanel(0, 0, Console.WindowWidth, Console.WindowHeight);
+            _menuPanel.SetView(_menuView); //Как будто можно и тут инициализировать, а не в BuildScreen
+
+            BuildPanels();
         }
+
+        protected void BuildPanels()
+        {
+            _panels.Clear();
+            _panels.Add(_menuPanel);
+        }
+
 
         public override void BuildScreen()
         {
-            _menuPanel.Render(_menuView, _screenBuffer);
+            //_menuPanel.SetView(_menuView);
         }
 
         public override bool HandleInput(PlayerAction action)

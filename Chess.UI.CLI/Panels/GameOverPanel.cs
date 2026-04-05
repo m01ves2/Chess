@@ -12,7 +12,7 @@ namespace Chess.UI.CLI.Panels
 
         public override void BuildBuffer(GameOverView view)
         {
-            ClearLines();
+            ClearBuffer();
             view.GameOverItems.ForEach(item => AddLine(new LineRender() { Text = item, Style = LineStyle.Selected}));
         }
     }

@@ -15,9 +15,10 @@ namespace Chess.UI.CLI.Panels.BasePanels
 
         protected void AddLine(LineRender line)
         {
-            line.Text = line.Text.PadRight(InnerWidth);
+            //line.Text = line.Text.PadRight(InnerWidth);
             _lines.Add(line);
         }
+
 
         public override void CopyToScreen(CellRender[,] _screenBuffer)
         {
@@ -28,7 +29,8 @@ namespace Chess.UI.CLI.Panels.BasePanels
                 for (int x = 0; x < line.Text.Length; x++) {
                     var fg = line.Style == LineStyle.Selected ? ConsoleColor.Red : Console.ForegroundColor;
 
-                    if (_screenBuffer[Y + 1 + y, X + 1 + x].Symbol != line.Text[x] || _screenBuffer[Y + 1 + y, X + 1 + x].fg != fg) {
+                    if (_screenBuffer[Y + 1 + y, X + 1 + x].Symbol != line.Text[x] || 
+                        _screenBuffer[Y + 1 + y, X + 1 + x].fg != fg) {
                         _screenBuffer[Y + 1 + y, X + 1 + x].Symbol = line.Text[x];
                         _screenBuffer[Y + 1 + y, X + 1 + x].fg = fg;
                         _screenBuffer[Y + 1 + y, X + 1 + x].bg = Console.BackgroundColor;
@@ -36,17 +38,17 @@ namespace Chess.UI.CLI.Panels.BasePanels
                 }
             }
 
-            for (int y = visibleLines.Count; y < InnerHeight; y++) {
-                for (int x = 0; x < InnerWidth; x++) {
-                    var cell = _screenBuffer[Y + 1 + y, X + 1 + x];
-                    cell.Symbol = ' ';
-                    cell.fg = Console.ForegroundColor;
-                    cell.bg = Console.BackgroundColor;
-                }
-            }
+            //for (int y = visibleLines.Count; y < InnerHeight; y++) {
+            //    for (int x = 0; x < InnerWidth; x++) {
+            //        var cell = _screenBuffer[Y + 1 + y, X + 1 + x];
+            //        cell.Symbol = ' ';
+            //        cell.fg = Console.ForegroundColor;
+            //        cell.bg = Console.BackgroundColor;
+            //    }
+            //}
         }
 
-        protected void ClearLines()
+        public override void ClearBuffer()
         {
             _lines.Clear();
         }

@@ -12,7 +12,8 @@
     }
     public class LineRender
     {
-        public string Text { get; set; }
+        public string Text { get; set; } = "";
         public LineStyle Style { get; set; } = LineStyle.None;  // стиль строки (цвет, жирность, курсив, подсветка)
     }
+
 }
