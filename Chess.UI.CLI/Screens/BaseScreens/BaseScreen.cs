@@ -1,6 +1,8 @@
-﻿using Chess.UI.CLI.Models;
+﻿using Chess.UI.CLI.Diagnostics;
+using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Panels.BasePanels;
 using Chess.UI.CLI.Panels.BasePanels.Rendering;
+using Chess.UI.CLI.Themes;
 
 namespace Chess.UI.CLI.Screens.BaseScreens
 {
@@ -14,6 +16,10 @@ namespace Chess.UI.CLI.Screens.BaseScreens
         protected readonly ScreenManager _manager;
         private int ConsoleWidth = Console.WindowWidth;
         private int ConsoleHeight = Console.WindowHeight;
+
+        private static readonly ConsoleColor DefaultFg = Theme.Text.Default;
+        private static readonly ConsoleColor DefaultBg = Theme.Background.Default;
+        private static ScreenDebugger _debugger = new ScreenDebugger();
 
         // все панели экрана
         protected List<IPanel> _panels = new();
@@ -54,8 +60,8 @@ namespace Chess.UI.CLI.Screens.BaseScreens
             for (int row = 0; row < Height; row++)
                 for (int col = 0; col < Width; col++) {
                     _screenBuffer[row, col].Symbol = ' ';
-                    _screenBuffer[row, col].bg = Console.BackgroundColor;
-                    _screenBuffer[row, col].fg = Console.ForegroundColor;
+                    _screenBuffer[row, col].bg = DefaultBg;
+                    _screenBuffer[row, col].fg = DefaultFg;
                 }
         }
         public abstract void BuildScreen();
@@ -72,14 +78,14 @@ namespace Chess.UI.CLI.Screens.BaseScreens
         //{
         //    var defaultForeground = Console.ForegroundColor;
         //    var defaultBackground = Console.BackgroundColor;
-        //    for (int row = 0; row < MinHeight; row++) {
+        //    for (int row = 0; row < Height; row++) {
         //        string rowChanged = "";
         //        int rowChangedStartIndex = 0;
 
         //        ConsoleColor segmentFg = defaultForeground;
         //        ConsoleColor segmentBg = defaultBackground;
 
-        //        for (int col = 0; col < MinWidth; col++) {
+        //        for (int col = 0; col < Width; col++) {
         //            var current = _screenBuffer[row, col];
         //            var prev = _prevScreenBuffer[row, col];
 
@@ -127,23 +133,15 @@ namespace Chess.UI.CLI.Screens.BaseScreens
         //}
 
 
-        //public void Flush()
-        //{
-        //    Console.SetCursorPosition(0, 0);
 
-        //    for (int row = 0; row < MinHeight; row++) {
-        //        for (int col = 0; col < MinWidth; col++) {
-        //            var cell = _screenBuffer[row, col];
-        //            Console.ForegroundColor = cell.fg;
-        //            Console.BackgroundColor = cell.bg;
-        //            Console.Write(cell.Symbol);
-        //        }
-        //    }
-        //}
         public void Flush()
         {
-            var defaultForeground = Console.ForegroundColor;
-            var defaultBackground = Console.BackgroundColor;
+            var defaultForeground = Theme.Text.Default;
+            var defaultBackground = Theme.Background.Default;
+
+            ConsoleColor currentFg = defaultForeground;
+            ConsoleColor currentBg = defaultBackground;
+
             Console.SetCursorPosition(0, 0); // всегда в верхний левый угол
             for (int row = 0; row < Height; row++) {
                 for (int col = 0; col < Width; col++) {
@@ -152,8 +150,17 @@ namespace Chess.UI.CLI.Screens.BaseScreens
 
                     if (current != previous) {
                         Console.SetCursorPosition(col, row);
-                        Console.ForegroundColor = current.fg;
-                        Console.BackgroundColor = current.bg;
+
+                        if (current.fg != currentFg) {
+                            Console.ForegroundColor = current.fg;
+                            currentFg = current.fg;
+                        }
+
+                        if (current.bg != currentBg) {
+                            Console.BackgroundColor = current.bg;
+                            currentBg = current.bg;
+                        }
+
                         Console.Write(current.Symbol);
 
                         // Копируем значение в prev
@@ -161,6 +168,8 @@ namespace Chess.UI.CLI.Screens.BaseScreens
                     }
                 }
             }
+
+            _debugger.Tick();
 
             Console.ForegroundColor = defaultForeground;
             Console.BackgroundColor = defaultBackground;

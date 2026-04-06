@@ -22,12 +22,12 @@ namespace Chess.UI.CLI.Screens
         public SettingsScreen(ScreenManager manager, GameSettings gameSettings) : base(manager)
         {
             _gameSettings = gameSettings;
+
             _settingsView = new SettingsView()
             {
-                AiDifficulty    = _gameSettings.AiDifficulty,
+                AiDifficulty = _gameSettings.AiDifficulty,
                 PlayerTypeBlack = _gameSettings.BlackPlayer,
                 PlayerTypeWhite = _gameSettings.WhitePlayer,
-                selectedIndex = 0,   
             };
             _settingsPanel = new SettingsPanel(0, 0, Console.WindowWidth, Console.WindowHeight);
             _settingsPanel.SetView(_settingsView);
@@ -67,21 +67,21 @@ namespace Chess.UI.CLI.Screens
 
         public void MoveDown()
         {
-            _settingsView.selectedIndex++;
-            if (_settingsView.selectedIndex > 2)
-                _settingsView.selectedIndex = 2;
+            _settingsView.SelectedIndex++;
+            if (_settingsView.SelectedIndex > _settingsView.Items.Count())
+                _settingsView.SelectedIndex = 2;
         }
 
         public void MoveUp()
         {
-            _settingsView.selectedIndex--;
-            if (_settingsView.selectedIndex < 0)
-                _settingsView.selectedIndex = 0;
+            _settingsView.SelectedIndex--;
+            if (_settingsView.SelectedIndex < 0)
+                _settingsView.SelectedIndex = 0;
         }
 
         private void HandleSelection()
         {
-            switch (_settingsView.selectedIndex) {
+            switch (_settingsView.SelectedIndex) {
                 case 0:
                     TogglePlayerWhiteSetting();
                     break;

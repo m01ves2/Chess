@@ -32,13 +32,13 @@ namespace Chess.UI.CLI
 
             while (!IsExitRequested) {  // ЕДИНСТВЕННЫЙ цикл
 
-            var start = DateTime.Now;
-                
+                var start = DateTime.Now;
+
                 Render();                                   // рисует всё: меню, панели, доску
                 var action = _inputHandler.ReadAction();    // читает пользовательский ввод. если играет Ai vs Ai...
                 if (action != null)
                     HandleInput(action);                        // передаёт ввод текущему экрану
-                
+
                 _currentScreen.Tick();                      // двигает логику экрана (игру или ничего)
 
                 var elapsed = DateTime.Now - start;
@@ -48,7 +48,7 @@ namespace Chess.UI.CLI
                     Thread.Sleep(sleep);
             }
         }
-
+ 
 
         public void SetScreen(BaseScreen screen)
         {

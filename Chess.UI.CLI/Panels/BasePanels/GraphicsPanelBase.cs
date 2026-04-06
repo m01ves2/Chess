@@ -1,4 +1,5 @@
 ﻿using Chess.UI.CLI.Panels.BasePanels.Rendering;
+using Chess.UI.CLI.Themes;
 
 namespace Chess.UI.CLI.Panels.BasePanels
 {
@@ -36,8 +37,8 @@ namespace Chess.UI.CLI.Panels.BasePanels
             for (int r = 0; r < InnerHeight; r++)
                 for (int c = 0; c < InnerWidth; c++) {
                     _buffer[r, c].Symbol = ' ';
-                    _buffer[r, c].fg = Console.ForegroundColor;
-                    _buffer[r, c].bg = Console.BackgroundColor;
+                    _buffer[r, c].fg = Theme.Text.Default;
+                    _buffer[r, c].bg = Theme.Background.Default;
                 }
         }
     }
