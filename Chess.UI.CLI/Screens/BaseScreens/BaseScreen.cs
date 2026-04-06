@@ -24,6 +24,8 @@ namespace Chess.UI.CLI.Screens.BaseScreens
         // все панели экрана
         protected List<IPanel> _panels = new();
 
+        // Координаты курсора
+
         public BaseScreen(ScreenManager manager)
         {
             _manager = manager;

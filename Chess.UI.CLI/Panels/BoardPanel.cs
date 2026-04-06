@@ -29,7 +29,6 @@ namespace Chess.UI.CLI.Panels
             RenderFiles(view.IsBoardFlipped);
             BuildBoard(view.BoardView);
             BuildRanks(view.IsBoardFlipped);
-
         }
         private void RenderFiles(bool flipped)
         {

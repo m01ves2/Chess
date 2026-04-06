@@ -13,7 +13,7 @@ namespace Chess.UI.CLI.Panels.BasePanels.Rendering
 
         public static bool operator== (CellRender left, CellRender right)
         {
-            return left.Symbol == right.Symbol && left.fg == right.fg && left.bg == right.bg;
+            return left.bg == right.bg && left.fg == right.fg && left.Symbol == right.Symbol;
         }
 
         public static bool operator!=(CellRender left, CellRender right)

@@ -22,6 +22,9 @@ namespace Chess.Application
         public GameResult Result => _controller.Result;
         public bool IsGameOver => _controller.IsGameOver;
 
+        private DateTime? _aiMoveReadyTime = null;
+        private Move? _aiPendingMove = null;
+
         public GameChess(GameSettings gameSettings)
         {
             _controller = new GameController();
@@ -42,16 +45,31 @@ namespace Chess.Application
             if (_controller.IsGameOver)
                 return;
 
-            if (GetCurrentPlayer() is AiPlayer ai) {
+            var player = GetCurrentPlayer();
+
+            if (player is AiPlayer ai) {
                 if (_allLegalMovesCache.Count == 0)
                     _allLegalMovesCache.AddRange(_controller.GetAllLegalMoves());
 
-                var move = GetCurrentPlayer().TryGetMove(_allLegalMovesCache);
-
-                if (move != null) {
-                    _controller.DoMove(move);
-                    _allLegalMovesCache.Clear();
+                if (_aiPendingMove == null) {
+                    // AI думает мгновенно, но ход будет применен через секунду
+                    _aiPendingMove = ai.TryGetMove(_allLegalMovesCache);
+                    _aiMoveReadyTime = DateTime.Now + TimeSpan.FromSeconds(1);
                 }
+
+                if (_aiPendingMove != null && DateTime.Now >= _aiMoveReadyTime) {
+                    _controller.DoMove(_aiPendingMove);
+                    _allLegalMovesCache.Clear();
+
+                    // Сбрасываем таймер и ход
+                    _aiPendingMove = null;
+                    _aiMoveReadyTime = null;
+                }
+            }
+            else {
+                // Если ход игрока — сбрасываем AI-перенос
+                _aiPendingMove = null;
+                _aiMoveReadyTime = null;
             }
         }
 
