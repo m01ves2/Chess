@@ -15,7 +15,8 @@ namespace Chess.Application.Views
     public enum PieceViewColor
     {
         White,
-        Black
+        Black,
+        None
     }
 
     public class PieceView

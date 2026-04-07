@@ -1,6 +1,7 @@
 ﻿using Chess.Application.Models;
 using Chess.Domain;
 using Chess.Engine;
+using System.Drawing;
 
 namespace Chess.Application
 {
@@ -46,44 +47,45 @@ namespace Chess.Application
             _snapshotHistory.Push(CreateSnapshot());
         }
 
-        public void DoMove(Move move)
+        public void DoMove(Move move, bool updateGameInfo = true)
         {
             if (move == null) return;
 
             _snapshotHistory.Push(CreateSnapshot()); // snapshot ДО хода
             _gameEngine.MakeMove(_gamePosition, move);      // применяем ход один раз
             _moveHistory.Add(move);
-            //_pendingMove = null;
             SwitchPlayer();
-            UpdateGameInfo();
 
-            //if (_gameEngine.IsCheckmate(_gamePosition, _gamePosition.CurrentPlayerColor )) {
-            //    //_gameState = GameStatus.GameOver;
-            //    _isGameOver = true;
-            //    Winner = _gamePosition.CurrentPlayerColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
-            //}
-            if (_gameEngine.IsCheckmate(_gamePosition, _gamePosition.CurrentPlayerColor)) {
-                _isGameOver = true;
-                Winner = _gamePosition.CurrentPlayerColor == PieceColor.White
-                    ? PieceColor.Black
-                    : PieceColor.White;
-                Result = GameResult.Checkmate;
+            if (updateGameInfo) {
+                UpdateGameInfo();
+
+
+                //if (_gameEngine.IsCheckmate(_gamePosition, _gamePosition.CurrentPlayerColor)) {
+                //    _isGameOver = true;
+                //    Winner = _gamePosition.CurrentPlayerColor == PieceColor.White
+                //        ? PieceColor.Black
+                //        : PieceColor.White;
+                //    Result = GameResult.Checkmate;
+                //}
+                //else if (_gameEngine.IsStalemate(_gamePosition, _gamePosition.CurrentPlayerColor)) {
+                //    _isGameOver = true;
+                //    Winner = null; // ничья
+                //    Result = GameResult.Stalemate;
+                //}
             }
-            else if (_gameEngine.IsStalemate(_gamePosition, _gamePosition.CurrentPlayerColor)) {
-                _isGameOver = true;
-                Winner = null; // ничья
-                Result = GameResult.Stalemate;
-            }
+
         }
 
-        public void UndoMove()
+        public void UndoMove(bool updateGameInfo = true)
         {
             if (_snapshotHistory.Count > 1 && _moveHistory.Count > 0) {
                 var snapshot = _snapshotHistory.Pop();
                 _moveHistory.Remove(_moveHistory.Last());
 
                 RestoreSnapshot(snapshot);
-                UpdateGameInfo();
+                if (updateGameInfo) {
+                    UpdateGameInfo();
+                }
             }
         }
 
@@ -108,12 +110,61 @@ namespace Chess.Application
 
         public void UpdateGameInfo()
         {
-            //_gameScene.UpdateMoveHistory(_moveHistory);
-            GameInfo.WhiteKingInCheck = _gameEngine.IsKingInCheck(_gamePosition, PieceColor.White);
-            GameInfo.BlackKingInCheck = _gameEngine.IsKingInCheck(_gamePosition, PieceColor.Black);
+            GameInfo.WhiteKingInCheck = false;
+            GameInfo.BlackKingInCheck = false;
+
+            var kingInCheck = IsKingInCheck(_gamePosition, _gamePosition.CurrentPlayerColor);
+            if (kingInCheck) {
+                if (_gamePosition.CurrentPlayerColor == PieceColor.White) {
+                    GameInfo.WhiteKingInCheck = true;
+                }
+                else {
+                    GameInfo.BlackKingInCheck = true;
+                }
+            }
+
+            CheckmateOrStalemate(kingInCheck);
         }
 
-        public IEnumerable<Move>  GetAllLegalMoves()
+        public void CheckmateOrStalemate(bool kingInCheck)
+        {
+            _isGameOver = false;
+            Winner = null;
+            Result = GameResult.None;
+
+            var moves = _gameEngine.GetAllLegalMoves(_gamePosition, _gamePosition.CurrentPlayerColor);
+            if (!moves.Any()) {
+                _isGameOver = true;
+                if (kingInCheck) {
+                    Winner = _gamePosition.CurrentPlayerColor == PieceColor.White
+                        ? PieceColor.Black
+                        : PieceColor.White;
+                    Result = GameResult.Checkmate;
+                }
+                else {
+                    Winner = null;
+                    Result = GameResult.Stalemate;
+                }
+            }
+        }
+
+        //public bool IsCheckmate(GamePosition gamePosition, PieceColor color)
+        //{
+        //    if (!IsKingInCheck(gamePosition, color))
+        //        return false;
+
+        //    var moves = _gameEngine.GetAllLegalMoves(gamePosition, color);
+        //    return !moves.Any();
+        //}
+
+        public bool IsKingInCheck(GamePosition gamePosition, PieceColor color )
+        {
+            return _gameEngine.IsKingInCheck(gamePosition, color);
+        }
+
+
+
+        public IEnumerable<Move> GetAllLegalMoves()
         {
             return _gameEngine.GetAllLegalMoves(_gamePosition, _gamePosition.CurrentPlayerColor);
         }

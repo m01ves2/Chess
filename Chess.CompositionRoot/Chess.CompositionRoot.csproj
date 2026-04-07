@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Chess.AI\Chess.AI.csproj" />
     <ProjectReference Include="..\Chess.Application\Chess.Application.csproj" />
     <ProjectReference Include="..\Chess.Domain\Chess.Domain.csproj" />
     <ProjectReference Include="..\Chess.Engine\Chess.Engine.csproj" />

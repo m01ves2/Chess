@@ -10,14 +10,13 @@ namespace Chess.Application
         private GameController _controller;
         private IPlayer _whitePlayer;
         private IPlayer _blackPlayer;
-        //private IPlayer _currentPlayer;
 
         private DateTime _lastMoveTime = DateTime.MinValue;
         private TimeSpan _aiDelay = TimeSpan.FromMilliseconds(300);
 
-        private List<Move> _allLegalMovesCache = new List<Move>();
-        public PieceViewColor Winner => _controller.Winner == PieceColor.White ? PieceViewColor.White : PieceViewColor.Black;
-        //public bool IsGameOver => _controller.IsGameOver;
+        //private List<Move> _allLegalMovesCache = new List<Move>();
+        public PieceViewColor? Winner => _controller.Winner == PieceColor.White ? PieceViewColor.White : 
+                                        (_controller.Winner == PieceColor.Black ? PieceViewColor.Black : null);
         public bool IsPromotionPending => (GetCurrentPlayer() is HumanPlayer hp) ? hp.IsPromotionPending : false;
         public GameResult Result => _controller.Result;
         public bool IsGameOver => _controller.IsGameOver;
@@ -29,15 +28,15 @@ namespace Chess.Application
         {
             _controller = new GameController();
 
-            if(gameSettings.WhitePlayer == PlayerType.Human)
-                _whitePlayer = new HumanPlayer(_controller); //потом отдельно отрегулируем Ai va Ai
+            if (gameSettings.WhitePlayer == PlayerType.Human)
+                _whitePlayer = new HumanPlayer(_controller);
             else
-                _whitePlayer = new AiPlayer(_controller, gameSettings.AiDifficulty);
+                _whitePlayer = new AiPlayer(_controller, gameSettings.AiDifficulty, PieceColor.White);
 
             if (gameSettings.BlackPlayer == PlayerType.Human)
-                _blackPlayer = new HumanPlayer(_controller); //потом отдельно отрегулируем Ai va Ai
+                _blackPlayer = new HumanPlayer(_controller);
             else
-                _blackPlayer = new AiPlayer(_controller, gameSettings.AiDifficulty);
+                _blackPlayer = new AiPlayer(_controller, gameSettings.AiDifficulty, PieceColor.Black);
         }
 
         public void Tick()
@@ -48,18 +47,18 @@ namespace Chess.Application
             var player = GetCurrentPlayer();
 
             if (player is AiPlayer ai) {
-                if (_allLegalMovesCache.Count == 0)
-                    _allLegalMovesCache.AddRange(_controller.GetAllLegalMoves());
+                //if (_allLegalMovesCache.Count == 0)
+                //    _allLegalMovesCache.AddRange(_controller.GetAllLegalMoves());
 
                 if (_aiPendingMove == null) {
                     // AI думает мгновенно, но ход будет применен через секунду
-                    _aiPendingMove = ai.TryGetMove(_allLegalMovesCache);
+                    _aiPendingMove = ai.TryGetMove();
                     _aiMoveReadyTime = DateTime.Now + TimeSpan.FromSeconds(1);
                 }
 
                 if (_aiPendingMove != null && DateTime.Now >= _aiMoveReadyTime) {
                     _controller.DoMove(_aiPendingMove);
-                    _allLegalMovesCache.Clear();
+                   // _allLegalMovesCache.Clear();
 
                     // Сбрасываем таймер и ход
                     _aiPendingMove = null;
@@ -81,14 +80,14 @@ namespace Chess.Application
             if (GetCurrentPlayer() is not HumanPlayer hp)
                 return;
 
-            if (_allLegalMovesCache.Count == 0)
-                _allLegalMovesCache.AddRange(_controller.GetAllLegalMoves().ToList());
+            //if (_allLegalMovesCache.Count == 0)
+            //    _allLegalMovesCache.AddRange(_controller.GetAllLegalMoves().ToList());
 
-            var move = hp.Select(new Position(row, col), _allLegalMovesCache);
+            var move = hp.Select(new Position(row, col));
 
             if (move != null) {
                 _controller.DoMove(move);
-                _allLegalMovesCache.Clear();
+               // _allLegalMovesCache.Clear();
             }
         }
 
@@ -103,7 +102,7 @@ namespace Chess.Application
             if (GetCurrentPlayer() is HumanPlayer hp)
                 hp.UndoMove();
             _controller.UndoMove();
-            _allLegalMovesCache.Clear();
+        //    _allLegalMovesCache.Clear();
         }
 
         public void CompletePromotion(PieceViewType promotionPiece)
@@ -113,7 +112,7 @@ namespace Chess.Application
 
                 if (move != null) {
                     _controller.DoMove(move);
-                    _allLegalMovesCache.Clear();
+                    //_allLegalMovesCache.Clear();
                 }
             }
         }
@@ -134,7 +133,8 @@ namespace Chess.Application
                 selection = hp.SelectedFrom;
 
             List<Position> highlights = new List<Position>();
-            highlights.AddRange(_allLegalMovesCache.Where(m => m.From == selection).Select(m => m.To).ToList());
+            var moves = _controller.GetAllLegalMoves();
+            highlights.AddRange(moves.Where(m => m.From == selection).Select(m => m.To).ToList());
             PieceColor currentPlayerColor = _controller.GamePosition.CurrentPlayerColor;
 
             return Mapper.GetBoardView(board, selection, highlights, currentPlayerColor);

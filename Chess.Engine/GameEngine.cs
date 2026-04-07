@@ -279,6 +279,8 @@ namespace Chess.Engine
         public bool IsKingInCheck(GamePosition gamePosition, PieceColor color)
         {
             var kingSquare = FindKingSquare(gamePosition, color);
+            if (kingSquare == null)
+                return false; // короля нет — шах невозможен
 
             foreach (var square in gamePosition.Board.Squares) {
                 var piece = square.Piece;

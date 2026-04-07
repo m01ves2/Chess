@@ -21,7 +21,7 @@ namespace Chess.Application.Players
             _gameController = gameController;
         }
 
-        public Move? TryGetMove(List<Move> moves)
+        public Move? TryGetMove()
         {
             // просто возвращает null, ход обрабатывается через Select и событие
             return null;
@@ -33,7 +33,7 @@ namespace Chess.Application.Players
             From = null;
         }
 
-        public Move? Select(Position position, List<Move> moves)
+        public Move? Select(Position position)
         {
             // 1. если нет выбранной фигуры
             if (From == null) {
@@ -56,6 +56,7 @@ namespace Chess.Application.Players
             }
 
             // 3. пытаемся найти ход
+            var moves = _gameController.GetAllLegalMoves().ToList();
             var move = moves.FirstOrDefault(m => m.From == From && m.To == position);
 
             if (move == null)

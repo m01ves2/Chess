@@ -1,5 +1,4 @@
-﻿using Chess.Application;
-using Chess.Application.Models;
+﻿using Chess.Application.Models;
 using Chess.UI.CLI.Interfaces;
 using Chess.UI.CLI.Models;
 using Chess.UI.CLI.Screens;

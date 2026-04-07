@@ -109,7 +109,8 @@ namespace Chess.UI.CLI.Screens
             }
 
             var boardView = _gameChess.GetBoardView();
-            isBoardFlipped = (_manager.GameSettings.BlackPlayer == PlayerType.Human && boardView.currentPlayer == PieceViewColor.Black);
+            isBoardFlipped = (_manager.GameSettings.BlackPlayer == PlayerType.Human && boardView.currentPlayer == PieceViewColor.Black) || 
+                             (_manager.GameSettings.WhitePlayer == PlayerType.Ai && _manager.GameSettings.BlackPlayer == PlayerType.Human);
             var boardDisplayView = new BoardDisplayView() { BoardView = boardView, IsBoardFlipped = isBoardFlipped };
             _boardPanel.SetView(boardDisplayView);
 
