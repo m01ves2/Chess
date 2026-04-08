@@ -162,8 +162,6 @@ namespace Chess.Application
             return _gameEngine.IsKingInCheck(gamePosition, color);
         }
 
-
-
         public IEnumerable<Move> GetAllLegalMoves()
         {
             return _gameEngine.GetAllLegalMoves(_gamePosition, _gamePosition.CurrentPlayerColor);

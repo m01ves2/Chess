@@ -3,10 +3,8 @@
     public class PromotionMove : Move
     {
         public Piece? PromotionPiece { get; private set; }
-        public Piece? CapturedPiece { get; }
-        public PromotionMove(Position from, Position to, Piece piece, Piece? capturedPiece = null) : base(from, to, piece)
+        public PromotionMove(Position from, Position to, Piece piece, Piece? capturedPiece = null) : base(from, to, piece, capturedPiece)
         {
-            CapturedPiece = capturedPiece;
         }
 
         public override void Apply(GamePosition gamePosition)

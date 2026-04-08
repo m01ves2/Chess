@@ -2,11 +2,10 @@
 {
     public class NormalMove : Move
     {
-        public Piece? CapturedPiece { get; }
+        //public Piece? CapturedPiece { get; }
 
-        public NormalMove(Position from, Position to, Piece piece, Piece? capturedPiece = null) : base(from, to, piece)
+        public NormalMove(Position from, Position to, Piece piece, Piece? capturedPiece = null) : base(from, to, piece, capturedPiece)
         {
-            CapturedPiece = capturedPiece;
         }
 
         public override void Apply(GamePosition gamePosition)

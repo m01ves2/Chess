@@ -6,11 +6,13 @@
         public Position From { get; }
         public Position To { get; }
         public Piece Piece { get; }
-        public Move(Position from, Position to, Piece piece)
+        public Piece? CapturedPiece { get; } = null;
+        public Move(Position from, Position to, Piece piece, Piece? capturedPiece = null)
         {
             From = from;
             To = to;
             Piece = piece;
+            CapturedPiece = capturedPiece;
         }
 
         public abstract void Apply(GamePosition gamePosition);

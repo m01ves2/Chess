@@ -3,11 +3,9 @@
     public class EnPassantMove : Move
     {
         public Position CapturedPiecePosition { get; }
-        public Piece CapturedPiece { get; }
-        public EnPassantMove(Position from, Position to, Piece piece, Position capturedPiecePosition, Piece capturedPiece) : base(from, to, piece)
+        public EnPassantMove(Position from, Position to, Piece piece, Position capturedPiecePosition, Piece capturedPiece) : base(from, to, piece, capturedPiece)
         {
             CapturedPiecePosition = capturedPiecePosition;
-            CapturedPiece = capturedPiece;
         }
 
         public override void Apply(GamePosition gamePosition)

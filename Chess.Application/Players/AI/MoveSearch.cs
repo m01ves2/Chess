@@ -26,7 +26,7 @@ namespace Chess.Application.Players.AI
             var moves = _gameController.GetAllLegalMoves();
             int bestScore = int.MinValue;
             List<Move> bestMoves = new List<Move>();
-
+            moves = moves.OrderByDescending(move => MoveRater.ScoreMove(move)).ToList();
             foreach (var move in moves) {
                 var simPosition = _gameController.GamePosition.Clone(); // клон всей позиции
                 var simEngine = new GameEngine();
