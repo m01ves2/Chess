@@ -24,14 +24,5 @@ namespace Chess.Application.Players
         {
             return _minimax.FindBestMove();
         }
-
-        //public Move? TryGetMove(List<Move> moves)
-        //{
-        //    var move = moves[_random.Next(moves.Count)];
-        //    if (move is PromotionMove pm) {
-        //        pm.SetPromotionPiece(new Queen(_gameController.GamePosition.CurrentPlayerColor));
-        //    }
-        //    return move;
-        //}
     }
 }

@@ -128,8 +128,16 @@ namespace Chess.Engine
             var enPassantTargetSquare = gamePosition.Board.GetSquare(enPassantTarget.Value);
             var step = pos + offset;
             if (enPassantTarget == step) {
+                //var capturedPiecePosition = new Position(pos.Row, step.Col);
+                //var capturedPiece = gamePosition.Board.GetSquare(capturedPiecePosition).Piece!;
+                //yield return new EnPassantMove(pos, step, pawn, capturedPiecePosition, capturedPiece);
+
                 var capturedPiecePosition = new Position(pos.Row, step.Col);
-                var capturedPiece = gamePosition.Board.GetSquare(capturedPiecePosition).Piece!;
+                var capturedSquare = gamePosition.Board.GetSquare(capturedPiecePosition);
+                if (capturedSquare.Piece == null)
+                    yield break; // некорректный энпассан — пропускаем
+                var capturedPiece = capturedSquare.Piece;
+
                 yield return new EnPassantMove(pos, step, pawn, capturedPiecePosition, capturedPiece);
             }
 
@@ -336,9 +344,9 @@ namespace Chess.Engine
         }
 
 
-        public IEnumerable<Move> GetAllLegalMoves(GamePosition gamePosition, PieceColor player)
+        public IEnumerable<Move> GetAllLegalMoves(GamePosition gamePosition, PieceColor playerColor)
         {
-            foreach (var square in gamePosition.GetSquaresWithPlayerPieces(player)) {
+            foreach (var square in gamePosition.GetSquaresWithPlayerPieces(playerColor)) {
                 foreach (var move in GetLegalMoves(gamePosition, square.Position)) {
                     yield return move;
                 }

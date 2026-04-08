@@ -14,8 +14,10 @@
         }
 
         public abstract void Apply(GamePosition gamePosition);
-        
+
+        public override string ToString()
+        {
+            return "From: " + From.ToString() + " To: " + To.ToString();
+        }
     }
-
-
 }

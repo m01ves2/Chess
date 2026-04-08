@@ -56,10 +56,10 @@ namespace Chess.UI.CLI.Panels
             int XOffset = 1;
             for (int r = 0; r < _boardSize; r++) {
                 if (flipped) {
-                    _buffer[r * _cellHeight + YOffset, XOffset].Symbol = char.Parse((8 - r).ToString());
+                    _buffer[r * _cellHeight + YOffset, XOffset].Symbol = char.Parse((1 + r).ToString());
                 }
                 else {
-                    _buffer[r * _cellHeight + YOffset, XOffset].Symbol = char.Parse((1 + r).ToString());
+                    _buffer[r * _cellHeight + YOffset, XOffset].Symbol = char.Parse((8 - r).ToString());
                 }
                 _buffer[r * _cellHeight + YOffset, XOffset].fg = ConsoleColor.Yellow;
                 _buffer[r * _cellHeight + YOffset, XOffset].bg = ConsoleColor.Black;

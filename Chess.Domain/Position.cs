@@ -13,7 +13,7 @@ namespace Chess.Domain
             Col = col;
         }
 
-        public override string ToString() => $"{(char)('a' + Col)}{Row + 1}";
+        public override string ToString() => $"{(char)('a' + Col)}{8 - Row}";
 
         public override bool Equals(object? obj) => obj is Position other && this == other;
         public override int GetHashCode() => HashCode.Combine(Row, Col);

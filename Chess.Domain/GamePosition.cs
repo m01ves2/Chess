@@ -5,7 +5,7 @@
         public Board Board { get; }
         public GameState State { get; }
 
-        public PieceColor CurrentPlayerColor { get; private set; }
+        public PieceColor CurrentPlayerColor { get; set; } //TODO private set
 
         public GamePosition(Board board, GameState state, PieceColor currentPlayer)
         {

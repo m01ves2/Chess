@@ -96,7 +96,8 @@ namespace Chess.UI.CLI.Screens
         }//TODO
         private GameOverView RenderGameOverView()
         {
-            return new GameOverView() { GameOverItems = new List<string>() { "G A M E  O V E R !", " ", $"It's {_gameChess.Result}!",  $"{_gameChess.Winner} side wins!" } };
+            string winMessage = _gameChess.Winner == null ? "It's draw!" : $"{_gameChess.Winner} wins!";
+            return new GameOverView() { GameOverItems = new List<string>() { "G A M E  O V E R !", " ", $"It's {_gameChess.Result}!",  $"{winMessage}" } };
         }//TODO
 
         public override void BuildScreen()
