@@ -8,7 +8,7 @@ namespace Chess.Engine
     {
         public IEnumerable<Move> GetLegalMoves(GamePosition gamePosition, Position from)
         {
-            var pseudoMoves = GeneratePseudoMoves(gamePosition, from);
+            var pseudoMoves = GetPseudoMoves(gamePosition, from);
             foreach (var move in pseudoMoves) {
                 if (!WouldBeCheck(gamePosition, move)) {
                     yield return move;
@@ -17,7 +17,7 @@ namespace Chess.Engine
             }
         }
 
-        private IEnumerable<Move> GeneratePseudoMoves(GamePosition gamePosition, Position pos)
+        private IEnumerable<Move> GetPseudoMoves(GamePosition gamePosition, Position pos)
         {
             var piece = gamePosition.Board.GetSquare(pos).Piece;
 
@@ -294,7 +294,7 @@ namespace Chess.Engine
                 var piece = square.Piece;
                 if (piece == null || piece.Color == color) continue;
 
-                var moves = GeneratePseudoMoves(gamePosition, square.Position).ToList();
+                var moves = GetPseudoMoves(gamePosition, square.Position).ToList();
 
                 if (moves.Any(m => m.To == kingSquare!.Position))
                     return true;
@@ -348,6 +348,15 @@ namespace Chess.Engine
         {
             foreach (var square in gamePosition.GetSquaresWithPlayerPieces(playerColor)) {
                 foreach (var move in GetLegalMoves(gamePosition, square.Position)) {
+                    yield return move;
+                }
+            }
+        }
+
+        public IEnumerable<Move> GetAllPseudoMoves(GamePosition gamePosition, PieceColor playerColor)
+        {
+            foreach (var square in gamePosition.GetSquaresWithPlayerPieces(playerColor)) {
+                foreach (var move in GetPseudoMoves(gamePosition, square.Position)) {
                     yield return move;
                 }
             }

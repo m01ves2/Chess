@@ -23,7 +23,7 @@ namespace Chess.UI.CLI.Panels.BasePanels.Rendering
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return HashCode.Combine(Symbol, fg, bg);
         }
     }
 }

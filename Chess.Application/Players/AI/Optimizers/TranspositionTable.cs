@@ -17,7 +17,16 @@ namespace Chess.Application.Players.AI.Optimizers
                     sb.Append(PieceToChar(square.Piece));
             }
 
-            sb.Append(pos.CurrentPlayerColor);
+            sb.Append(pos.State.WhiteKingMoved);
+            sb.Append(pos.State.BlackKingMoved);
+            sb.Append(pos.State.WhiteRookA_Moved);
+            sb.Append(pos.State.WhiteRookH_Moved);
+            sb.Append(pos.State.BlackRookA_Moved);
+            sb.Append(pos.State.BlackRookH_Moved);
+
+            if (pos.State.EnPassantTarget != null)
+                sb.Append(pos.State.EnPassantTarget.Value.Row)
+                  .Append(pos.State.EnPassantTarget.Value.Col);
 
             return sb.ToString();
         }
