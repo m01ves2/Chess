@@ -1,8 +1,6 @@
-﻿using Chess.Application.Views;
+﻿using Chess.Application.Players.AI.Optimizers;
 using Chess.Domain;
 using Chess.Engine;
-using System.Diagnostics;
-using System.Drawing;
 
 namespace Chess.Application.Players.AI
 {
@@ -13,6 +11,7 @@ namespace Chess.Application.Players.AI
         private readonly PieceColor _aiColor;
         private readonly GameEngine _engine = new GameEngine();
         private static readonly Random _random = new Random();
+        Dictionary<string, int> _cache = new();
 
         public MoveSearch(GameController gameController, int aiDifficulty, PieceColor aiColor)
         {
@@ -26,7 +25,7 @@ namespace Chess.Application.Players.AI
             var moves = _gameController.GetAllLegalMoves();
             int bestScore = int.MinValue;
             List<Move> bestMoves = new List<Move>();
-            moves = moves.OrderByDescending(move => MoveRater.ScoreMove(move)).ToList();
+            moves = moves.OrderByDescending(move => MoveRater.ScoreMove(_gameController.GamePosition, move)).ToList();
             foreach (var move in moves) {
                 var simPosition = _gameController.GamePosition.Clone(); // клон всей позиции
                 var simEngine = new GameEngine();
@@ -56,6 +55,10 @@ namespace Chess.Application.Players.AI
         {
             if (depth == 0)
                 return Evaluator.Evaluate(position, _aiColor);
+
+            var key = TranspositionTable.GetKey(position);
+            if (_cache.TryGetValue(key, out var cached))
+                return cached;
 
             var currentColor = position.CurrentPlayerColor;
             var moves = _engine.GetAllLegalMoves(position, currentColor);
@@ -91,6 +94,7 @@ namespace Chess.Application.Players.AI
                     break;
             }
 
+            _cache[key] = bestEval;
             return bestEval;
         }
     }
