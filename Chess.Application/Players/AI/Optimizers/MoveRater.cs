@@ -19,37 +19,40 @@ namespace Chess.Application.Players.AI.Optimizers
 
             // 2. Promotion
             if (move is PromotionMove)
-                score += 100;
+                score += 80;
 
             if (move is KingCastlingMove)
-                score += 50;
+                score += 30;
 
-            // 3. Checks (да, через clone пока)
+            // 3. Checks
             if (GivesCheck(position, move))
-                score += 50;
+                score += 10;
 
             // 4. Piece activity
             if (move.Piece is Knight or Bishop)
-                score += 10;
+                score += 1;
 
-            if (move.Piece is Queen)
-                score -= 5;
+            if (move.Piece is Queen && move.CapturedPiece == null)
+                score -= 10;
 
             // 5. Pawn penalty
             if (move.Piece is Pawn && move.CapturedPiece == null)
-                score -= 1;
+                score += 2;
 
             // 6. Move piece to the center
             if (IsCenter4x4(move.To)) { //если фигуры Ai толпятся в центре - они больше контролируют пространства. поощряем
                 score += 1;
             }
 
+            // 7. Moves from start positions
+            score += ScoresForPromotionalMove(move);
+
             return score;
         }
 
-        private static bool GivesCheck(GamePosition position, Move move)
+        private static bool GivesCheck(GamePosition position, Move move) 
         {
-            var simPosition = position.Clone();
+            var simPosition = position.Clone();// (да, через clone пока)
             var engine = new GameEngine();
 
             engine.MakeMove(simPosition, move);
@@ -58,14 +61,14 @@ namespace Chess.Application.Players.AI.Optimizers
             return engine.IsKingInCheck(simPosition, simPosition.CurrentPlayerColor);
         }
 
-        private static int GetPieceWeight(Piece piece) => piece switch
+        public static int GetPieceWeight(Piece piece) => piece switch
         {
-            Pawn => 2,
-            Knight => 5,
-            Bishop => 5,
-            Rook => 10,
-            Queen => 50,
-            King => 40,
+            Pawn => 10,
+            Knight => 30,
+            Bishop => 30,
+            Rook => 50,
+            Queen => 90,
+            King => 0,
             _ => 0
         };
 
@@ -80,25 +83,25 @@ namespace Chess.Application.Players.AI.Optimizers
             var score = 0;
             var piece = move.Piece;
 
-            if (piece is Knight && !((move.From.Row == 0 && (move.From.Col == 1 || move.From.Col == 6) && piece.Color == PieceColor.Black) ||
-                                     (move.From.Row == 7 && (move.From.Col == 1 || move.From.Col == 6) && piece.Color == PieceColor.White)))
+            if (piece is Knight && ((move.From.Row == 0 && (move.From.Col == 1 || move.From.Col == 6) && piece.Color == PieceColor.Black) ||
+                                    (move.From.Row == 7 && (move.From.Col == 1 || move.From.Col == 6) && piece.Color == PieceColor.White)))
                 score += 1;
 
-            if (piece is Bishop && !((move.From.Row == 0 && (move.From.Col == 2 || move.From.Col == 5) && piece.Color == PieceColor.Black) ||
-                                     (move.From.Row == 7 && (move.From.Col == 2 || move.From.Col == 5) && piece.Color == PieceColor.White)))
+            if (piece is Bishop && ((move.From.Row == 0 && (move.From.Col == 2 || move.From.Col == 5) && piece.Color == PieceColor.Black) ||
+                                    (move.From.Row == 7 && (move.From.Col == 2 || move.From.Col == 5) && piece.Color == PieceColor.White)))
                 score += 1;
 
-            if (piece is Rook   && !((move.From.Row == 0 && (move.From.Col == 0 || move.From.Col == 7) && piece.Color == PieceColor.Black) ||
-                                     (move.From.Row == 7 && (move.From.Col == 0 || move.From.Col == 7) && piece.Color == PieceColor.White)))
+            if (piece is Rook   && ((move.From.Row == 0 && (move.From.Col == 0 || move.From.Col == 7) && piece.Color == PieceColor.Black) ||
+                                    (move.From.Row == 7 && (move.From.Col == 0 || move.From.Col == 7) && piece.Color == PieceColor.White)))
                 score += 1;
 
-            if (piece is Queen &&  !((move.From.Row == 0 && move.From.Col == 3 && piece.Color == PieceColor.Black) ||
-                                     (move.From.Row == 7 && move.From.Col == 3 && piece.Color == PieceColor.White)))
-                score += 1;
+            if (piece is Queen &&  ((move.From.Row == 0 && move.From.Col == 3 && piece.Color == PieceColor.Black) ||
+                                    (move.From.Row == 7 && move.From.Col == 3 && piece.Color == PieceColor.White)))
+                score -= 20;
 
-            if (piece is Pawn && !((move.From.Row == 1 && piece.Color == PieceColor.Black) ||
-                                     (move.From.Row == 6 && piece.Color == PieceColor.White)))
-                score += 1;
+            if (piece is Pawn &&   ((move.From.Row == 1 && piece.Color == PieceColor.Black) ||
+                                    (move.From.Row == 6 && piece.Color == PieceColor.White)))
+                score += 2;
 
             return score;
         }

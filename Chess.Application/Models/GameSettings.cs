@@ -1,12 +1,5 @@
 ﻿namespace Chess.Application.Models
 { 
-    //public enum GameMode
-    //{
-    //    HumanVsHuman,
-    //    HumanVsAi,
-    //    AiVsAi,
-    //};
-
     public enum PlayerType
     {
         Human,

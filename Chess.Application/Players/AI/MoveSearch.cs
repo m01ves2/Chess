@@ -16,9 +16,9 @@ namespace Chess.Application.Players.AI
         private static readonly Random _random = new Random();
         private Dictionary<string, int> _cache = new(); //кеш для рассчета позиций, которые уже встречались
 
-        int _ttHits = 0;
-        int _ttMisses = 0;
-        int _totalMovesProcessed = 0;
+        //int _ttHits = 0;
+        //int _ttMisses = 0;
+        //int _totalMovesProcessed = 0;
 
         public MoveSearch(GameController gameController, int aiDifficulty, PieceColor aiColor)
         {
@@ -29,14 +29,16 @@ namespace Chess.Application.Players.AI
 
         public Move? FindBestMove()
         {
-            _ttHits = 0;
-            _ttMisses = 0;
+            //_ttHits = 0;
+            //_ttMisses = 0;
 
             var moves = _gameController.GetAllLegalMoves();
             int bestScore = int.MinValue;
             List<Move> bestMoves = new List<Move>();
             moves = moves.OrderByDescending(move => MoveRater.ScoreMove(_gameController.GamePosition, move)).ToList();
-            _totalMovesProcessed += moves.Count();
+            //_totalMovesProcessed += moves.Count();
+            HashSet<string> path = new HashSet<string>(); //путь для выявления циклов в принятии решений Ai, чтобы их избегать.
+            
             foreach (var move in moves) {
 
                 if(move is PromotionMove) {
@@ -48,7 +50,6 @@ namespace Chess.Application.Players.AI
                 simEngine.MakeMove(simPosition, move);
                 simPosition.SwitchTurn(); // переключаем ход
 
-                HashSet<string> path = new HashSet<string>(); //путь для выявления циклов в принятии решений Ai, чтобы их избегать.
 
                 int score = Minimax(simPosition, _depth, int.MinValue, int.MaxValue, path);
 
@@ -77,16 +78,16 @@ namespace Chess.Application.Players.AI
         {
             if (depth == 0)
                 return Evaluator.Evaluate(position, _aiColor);
-                //return Quiescence(position, alpha, beta);
+                //return Quiescence(position, alpha, beta, depth + 1);
 
             var key = TranspositionTable.GetKey(position);
             if (_cache.TryGetValue(key, out var cached)) {
-                _ttHits++;
+                //_ttHits++;
                 return cached;
             }
-            else {
-                _ttMisses++;
-            }
+            //else {
+            //    _ttMisses++;
+            //}
 
             if (path.Contains(key)) { //отслеживание позиций, которые уже встречались
                 return 0; // ничья / повтор
@@ -95,7 +96,7 @@ namespace Chess.Application.Players.AI
 
             var currentColor = position.CurrentPlayerColor;
             var moves = _engine.GetAllPseudoMoves(position, currentColor).OrderByDescending(m => MoveRater.ScoreMove(position, m)).ToList();
-            _totalMovesProcessed += moves.Count();
+            //_totalMovesProcessed += moves.Count();
 
             if (!moves.Any()) {
                 if (_engine.IsKingInCheck(position, currentColor))
@@ -155,8 +156,11 @@ namespace Chess.Application.Players.AI
             }
         }
 
-        private int Quiescence(GamePosition position, int alpha, int beta)
+        private int Quiescence(GamePosition position, int alpha, int beta, int depth = 0)
         {
+            if (depth > 5) // ограничение, чтобы не слишком долго думало
+                return Evaluator.Evaluate(position, _aiColor);
+
             int standPat = Evaluator.Evaluate(position, _aiColor);
 
             if (standPat >= beta)
@@ -168,7 +172,8 @@ namespace Chess.Application.Players.AI
             var currentColor = position.CurrentPlayerColor;
 
             // только ВЗЯТИЯ
-            var moves = _engine.GetAllPseudoMoves(position, currentColor).Where(m => m.CapturedPiece != null);
+            var moves = _engine.GetAllPseudoMoves(position, currentColor).Where(m => m.CapturedPiece != null &&
+            MoveRater.GetPieceWeight(m.CapturedPiece) >= MoveRater.GetPieceWeight(m.Piece)); //оставляем толко хорошие взятия
 
             foreach (var move in moves) {
                 if (move is PromotionMove) {
@@ -183,7 +188,7 @@ namespace Chess.Application.Players.AI
 
                 simPosition.SwitchTurn();
 
-                int score = -Quiescence(simPosition, -beta, -alpha); // negamax стиль
+                int score = Quiescence(simPosition, beta, alpha);
 
                 if (score >= beta)
                     return beta;
